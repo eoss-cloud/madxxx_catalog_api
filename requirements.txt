@@ -1,0 +1,32 @@
+# web api
+gunicorn
+gevent
+falcon
+falcon-cors
+
+# necessary for https and certs
+requests
+urllib3
+pyopenssl
+ndg-httpsclient
+pyasn1
+
+dateparser
+fuzzywuzzy
+python-Levenshtein
+
+geoalchemy2
+geojson
+shapely
+pytz
+lxml
+xmltodict
+
+iso8601
+Jinja2
+numpy
+
+dogpile.cache
+
+XlsxWriter
+
