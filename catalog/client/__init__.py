@@ -3,7 +3,7 @@ from falcon.routing import DefaultRouter
 from falcon_cors import CORS
 
 # TODO: Right now everything is allowed; finer specification will be better
-cors = CORS(allow_all_origins=True,
+cors = CORS(allow_all_origins='*',
             allow_methods_list=['GET', 'POST', 'OPTIONS'],
             allow_all_headers=True,
             allow_credentials_all_origins=True)

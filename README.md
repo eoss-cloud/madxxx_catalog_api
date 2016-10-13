@@ -15,3 +15,6 @@ starting web client and api in single gunicorn session for dev only
 - starting gunicorn in madxxx/ctaog/client: gunicorn -b unix:/tmp/gunicorn.sock  web_client:web --reload --workers 3
 - starting nginx: sudo nginx -c /Users/wehrmann/PycharmProjects/madxxx/catalog/client/nginx.conf
 - stoping nginx: sudo nginx 
+
+## Docker installation
+``` docker run -it -v /tmp/gunicorn:/tmp/gunicorn -e EOSS_CATALOG_DB=SQLALCHEMY_DB_STRING madxxx_catalog ```

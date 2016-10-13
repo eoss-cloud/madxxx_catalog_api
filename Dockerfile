@@ -28,7 +28,7 @@ ADD . /eoss_catalogue_system
 WORKDIR /eoss_catalogue_system
 RUN pip install -r requirements.txt
 
-ENV EOSS_CATALOG_DB bla
+#ENV EOSS_CATALOG_DB sqlite:////absolute/path/to/foo.db
 ENV SENTINEL_USER bla
 ENV SENTINEL_PASSWORD bla
 ENV PYTHONPATH $PYTHONPATH:/eoss_catalogue_system/catalog
