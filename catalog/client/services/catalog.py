@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf8
 import datetime
-import json
+import ujson
 import time
 
 import dateparser
@@ -109,9 +109,8 @@ class Catalog(object):
 
     # TODO: tiles list as input - only first will be returned or exception thrown !
     def _query_tile_geom(self, tiles):
-        tiles_list = set([x['tile'] for x in tiles])
-        tile_objs = Persistance().get_tile_geom(tiles_list)
-        return tile_objs.one()[0]
+        tile_objs = Persistance().get_tile_geom(tiles)
+        return tile_objs.all()
 
     def _export_query(self, found_dataset):
         row_keys = ['tile_identifier', 'entity_id', 'acq_time', 'clouds']
@@ -236,7 +235,6 @@ class CatalogApi(Catalog):
         elif format.lower() == 'geojson':
             tilegrids = defaultdict(lambda: defaultdict(list))
             geoms, attrs = list(), list()
-
             for x in found_dataset:
                 tilegrids[x['tile_identifier']]['acq_time'].append(x['acq_time'])
                 # tilegrids[x['tile_identifier']]['acq_time_js'].append(
@@ -244,12 +242,15 @@ class CatalogApi(Catalog):
                 tilegrids[x['tile_identifier']]['tile_identifier'].append(x['tile_identifier'])
                 tilegrids[x['tile_identifier']]['clouds'].append(x['clouds'])
 
-            for tile in tilegrids.keys():
-                tilegrids[tile]['count'] = len(tilegrids[tile]['clouds'])
-                tilegrids[tile]['tile_identifier'] = tilegrids[tile]['tile_identifier'][0]
-
             for tile_id in tilegrids.keys():
-                geoms.append(json.loads(self._query_tile_geom([{'tile': tile_id}])))
+                tilegrids[tile_id]['count'] = len(tilegrids[tile_id]['clouds'])
+                tilegrids[tile_id]['tile_identifier'] = tilegrids[tile_id]['tile_identifier'][0]
+
+            tiles_dict = dict()
+            for ref_name, geom in self._query_tile_geom(tilegrids.keys()):
+                tiles_dict[ref_name] = geom
+            for tile_id in tilegrids.keys():
+                geoms.append(ujson.loads(tiles_dict[tile_id]))
                 attrs.append(tilegrids[tile_id])
             results = make_GeoJson(geoms, attrs)
         elif format.lower() == 'csv':
@@ -347,7 +348,7 @@ class CatalogApi(Catalog):
             if format.lower() in ['hist', 'json', 'geojson']:
                 resp.set_header('Content-Type', 'application/json')
                 resp.set_header('Content-Encoding', 'gzip')
-                resp.body = compress_body(json.dumps(results))
+                resp.body = compress_body(ujson.dumps(results))
             elif format.lower() == 'csv':
                 resp.set_header('Content-Type', 'text/csv')
                 resp.set_header('Content-disposition', 'attachment;filename=%s;' % self.create_output_name('csv'))
@@ -361,7 +362,7 @@ class CatalogApi(Catalog):
         else:
             if format.lower() in ['hist', 'json', 'geojson']:
                 resp.set_header('Content-Type', 'application/json')
-                resp.body = json.dumps(results)
+                resp.body = ujson.dumps(results)
             elif format.lower() == 'csv':
                 resp.set_header('Content-Type', 'text/csv')
                 resp.set_header('Content-disposition', 'attachment;filename=%s;' % self.create_output_name('csv'))
@@ -409,14 +410,14 @@ class CatalogApi(Catalog):
         body = output.getvalue()
         output.close()
         try:
-            struct = json.loads(body.decode('utf-8'))
+            struct = ujson.loads(body.decode('utf-8'))
 
         except ValueError, e:
             # try decode  x-www-form-urlencoded
             query_str = falcon.util.uri.decode(body.decode('utf-8'))
             query_str = query_str[query_str.find('{'):query_str.rfind('}') + 1]
             try:
-                struct = json.loads(query_str)
+                struct = ujson.loads(query_str)
             except ValueError, e:
                 description = 'Give request is no valid JSON nor urlencoded psot body.'
                 raise falcon.HTTPUnsupportedMediaType(description,
@@ -451,14 +452,14 @@ class CatalogApi(Catalog):
         results['found_tiles'] = sorted(list(set([x['tile_identifier'] for x in found_dataset])))
         # results.update({'query': struct})
 
-        resp.body = json.dumps(results)
+        resp.body = ujson.dumps(results)
 
         resp.status = falcon.HTTP_200
         results['processing_time'] = time.time() - start_time
         if can_zip_response(req.headers):
             resp.set_header('Content-Type', 'application/json')
             resp.set_header('Content-Encoding', 'gzip')
-            resp.body = compress_body(json.dumps(results))
+            resp.body = compress_body(ujson.dumps(results))
         else:
             resp.set_header('Content-Type', 'application/json')
-            resp.body = json.dumps(results)
+            resp.body = ujson.dumps(results)

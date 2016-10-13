@@ -45,6 +45,10 @@ class Persistance:
     def get_all_sensor_aggregations(self):
         return self.session.query(SensorAggregation).all()
 
+    @region.cache_on_arguments()
+    def get_all_tilegrid(self):
+        return self.session.query(Spatial_Reference.ref_name,geoalchemy2.functions.ST_AsGeoJSON(Spatial_Reference.geom)).all()
+
     def get_reference_by_sensorgrid(self, ref_id, ref_type_id, sensor_grid):
         sat_grid = aliased(Spatial_Reference)
         ref_obj = aliased(Spatial_Reference)
@@ -84,8 +88,9 @@ class Persistance:
 
         return query
 
+    @region.cache_on_arguments()
     def get_tile_geom(self, tiles_list):
-        return self.session.query(geoalchemy2.functions.ST_AsGeoJSON(Spatial_Reference.geom)).filter(
+        return self.session.query(Spatial_Reference.ref_name, geoalchemy2.functions.ST_AsGeoJSON(Spatial_Reference.geom)).filter(
             Spatial_Reference.ref_name.in_(tiles_list))
 
     @region.cache_on_arguments()
