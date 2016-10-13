@@ -8,6 +8,7 @@ from client import ReverseRouter, cors, RequireJSON
 from client.services.catalog import CatalogApi
 from client.services.dataset import Dataset
 from client.services.references import ReferenceSearcher, Reference
+from client.services.root_service import RootResource
 from client.services.sensors import Sensors
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ my_router = ReverseRouter()
 app = falcon.API(middleware=[cors.middleware, RequireJSON()], router=my_router)
 
 # specify URL routes
+app.add_route('/', RootResource(), name='root')
 app.add_route('/dataset/{entity_id}.json', Dataset(), name='dataset_entity')
 app.add_route('/catalog/search/result.{format}', CatalogApi(my_router), name='catalog_result')
 app.add_route('/catalog/search/count', CatalogApi(my_router), name='catalog_count')

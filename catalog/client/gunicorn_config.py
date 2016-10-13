@@ -1,9 +1,9 @@
 # Default gunicorn configuration
 #
 
-bind = "0.0.0.0:8000"
+bind = "unix:/tmp/gunicorn.sock"
 chdir = "/"
-loglevel = "DEBUG"
+loglevel = "INFO"
 workers = "2"
 threads = "4"
 worker_class = "gevent"
