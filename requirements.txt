@@ -25,6 +25,7 @@ xmltodict
 iso8601
 Jinja2
 numpy
+ujson
 
 dogpile.cache
 
