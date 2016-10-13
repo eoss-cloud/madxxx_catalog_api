@@ -1,5 +1,5 @@
 import datetime
-import json
+import ujson
 
 import dateutil.parser
 import falcon
@@ -81,7 +81,7 @@ def deserialize(json_structure, is_string=True):
     :return: reconstructed object
     """
     if is_string:
-        obj_structure = json.loads(json_structure)
+        obj_structure = ujson.loads(json_structure)
     else:
         obj_structure = json_structure
 
@@ -132,7 +132,7 @@ def serialize(obj, as_json=True):
 
     # print result
     if as_json:
-        return json.dumps(result)
+        return ujson.dumps(result)
     else:
         return result
 

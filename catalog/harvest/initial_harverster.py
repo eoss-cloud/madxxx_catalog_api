@@ -2,7 +2,7 @@
 # coding: utf8
 # Created by sgebhardt at 30.08.16
 # Copyright EOSS GmbH 2016
-import json
+import ujson
 import sys
 
 import dateutil.parser
@@ -25,7 +25,7 @@ def sentinel_harvester(in_csv, N, M=1000):
             quicklookkey = tileinfokey.replace('tileInfo.json', 'preview.jpg')
             if counter < N + M and counter >= N:
                 if public_key_exists(SENTINEL_S3_BUCKET, tileinfokey) and public_key_exists(SENTINEL_S3_BUCKET, quicklookkey):
-                    tilenfodict = json.loads(public_get_filestream(SENTINEL_S3_BUCKET, tileinfokey))
+                    tilenfodict = ujson.loads(public_get_filestream(SENTINEL_S3_BUCKET, tileinfokey))
                     productkey = tilenfodict['productPath']
 
                     s3 = SentinelS3Container()
@@ -86,7 +86,7 @@ def sentinel_harvester_line(line):
         tileinfokey = tileinfokey.rstrip("\n")
         quicklookkey = tileinfokey.replace('tileInfo.json', 'preview.jpg')
         if public_key_exists(SENTINEL_S3_BUCKET, tileinfokey) and public_key_exists(SENTINEL_S3_BUCKET, quicklookkey):
-            tilenfodict = json.loads(public_get_filestream(SENTINEL_S3_BUCKET, tileinfokey))
+            tilenfodict = ujson.loads(public_get_filestream(SENTINEL_S3_BUCKET, tileinfokey))
             productkey = tilenfodict['productPath']
 
             s3 = SentinelS3Container()

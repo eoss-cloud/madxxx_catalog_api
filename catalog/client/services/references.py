@@ -112,7 +112,7 @@ class Reference():
             resp.set_header('Content-Type', content_type)
             resp.set_header('Content-Encoding', 'gzip')
             if content_type == 'application/json':
-                resp.body = compress_body(json.dumps(results))
+                resp.body = compress_body(ujson.dumps(results))
             else:
                 resp.body = compress_body(results)
         else:

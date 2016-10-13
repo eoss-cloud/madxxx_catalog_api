@@ -1,4 +1,4 @@
-import json
+import ujson
 import pprint
 
 import boto3
@@ -70,7 +70,7 @@ def get_public_bucket_resource(bucket_name, resource, target, region):
 
 def parse_notification_json(filename):
     with open(in_csv, 'r') as f:
-        return json.load(f)
+        return ujson.load(f)
 
 
 def extract_s3_structure(record, type='landsat'):
@@ -105,7 +105,7 @@ def main_landsat(message):
         # for f in [s3['object'], os.path.join(s3['s3_path'], s3['entity_id'] + '_MTL.json')]:
         #    print get_public_bucket_resource(s3['bucket_name'], f, out_dir, s3['aws_region'])
         f = os.path.join(out_dir, 'LC80290202016250LGN00_MTL.json')
-        obj = parse_l1_metadata_file(json.load(open(f, 'rt')), s3)
+        obj = parse_l1_metadata_file(ujson.load(open(f, 'rt')), s3)
         print obj.__dict__
     return obj
 
@@ -122,7 +122,7 @@ def generate_s2_tile_information(tile_path):
     quicklookkey = os.path.join(tile_path, 'preview.jpg')
 
     if public_key_exists(SENTINEL_S3_BUCKET, tileinfokey) and public_key_exists(SENTINEL_S3_BUCKET, quicklookkey):
-        tilenfodict = json.loads(public_get_filestream(SENTINEL_S3_BUCKET, tileinfokey))
+        tilenfodict = ujson.loads(public_get_filestream(SENTINEL_S3_BUCKET, tileinfokey))
         productkey = tilenfodict['productPath']
 
         s3 = SentinelS3Container()
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     out_dir = '/Users/wehrmann/eoss/temp'
     notification = parse_notification_json(in_csv)
 
-    message = json.loads(notification[u'Message'])
+    message = ujson.loads(notification[u'Message'])
     pprint.pprint(message)
     if get_message_type(message) == 'landsat':
         print main_landsat(message)

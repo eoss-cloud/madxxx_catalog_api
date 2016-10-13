@@ -1,7 +1,7 @@
 import cStringIO
 import datetime
 import gzip
-import json
+import ujson
 import urlparse
 
 VERSION = "v1"
@@ -142,6 +142,6 @@ def serialize(obj, as_json=True):
 
     # print result
     if as_json:
-        return json.dumps(result)
+        return ujson.dumps(result)
     else:
         return result

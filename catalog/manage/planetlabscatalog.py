@@ -44,7 +44,7 @@ from datetime import datetime
 from uuid import uuid4
 
 import geojson
-import json
+import ujson
 import requests
 from manage import ICatalog
 from model import Dataset, PlanetContainer
@@ -137,7 +137,7 @@ class PlanetDataCatalog(ICatalog):
 
         scenes_data = result.json()["features"]
         for scene in scenes_data:
-            print json.dumps(scene)
+            print ujson.dumps(scene)
 
 
 class PlanetCatalog(ICatalog):
@@ -188,7 +188,7 @@ class PlanetCatalog(ICatalog):
                 ds.uuid = uuid4()
                 ds.time_created = s['properties']['catalog::acquired']
                 # ds.extent = s['geometry']
-                g1 = geojson.loads(json.dumps(s['geometry']))
+                g1 = geojson.loads(ujson.dumps(s['geometry']))
                 g2 = shape(g1)
                 ds.extent = WKTElement(g2.wkt, srid=4326)
                 ds.properties = s['properties']
@@ -232,7 +232,7 @@ class PlanetScenes(ICatalog):
             ds.identifier = s['id']
             ds.uuid = uuid4()
             ds.time_created = s['properties']['acquired']
-            g1 = geojson.loads(json.dumps(s['geometry']))
+            g1 = geojson.loads(ujson.dumps(s['geometry']))
             g2 = shape(g1)
             ds.extent = WKTElement(g2.wkt, srid=4326)
             ds.properties = s['properties']

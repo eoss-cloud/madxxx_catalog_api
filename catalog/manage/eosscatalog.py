@@ -1,6 +1,6 @@
 # Created by sgebhardt at 06.10.16
 # Copyright EOSS GmbH 2016
-import json
+import ujson
 import requests
 from manage import ICatalog
 from model.plain_models import Catalog_Dataset
@@ -34,7 +34,7 @@ class EOSSCatalog(ICatalog):
 
         params['areas'] = [{'aoi': geometry}]
 
-        response = requests.post(self.url, json=json.loads(json.dumps(params)), auth=session.auth, headers=headers)
+        response = requests.post(self.url, json=ujson.loads(ujson.dumps(params)), auth=session.auth, headers=headers)
 
         datasets = set()
         if response.status_code == requests.codes.ok:

@@ -1,4 +1,4 @@
-import json
+import ujson
 import pprint
 import sys
 import time
@@ -46,8 +46,8 @@ if __name__ == '__main__':
 
         for message_obj in queue.receive_messages(MaxNumberOfMessages=MAX_MESSAGES, WaitTimeSeconds=10):
             messages_to_delete = list()
-            notification = json.loads(message_obj.body)
-            message = json.loads(notification[u'Message'])
+            notification = ujson.loads(message_obj.body)
+            message = ujson.loads(notification[u'Message'])
 
             if get_message_type(message) == 'landsat':
                 print 'Landsat mode'
