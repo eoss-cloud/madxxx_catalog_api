@@ -1,5 +1,6 @@
 import logging
 import urlparse
+import ujson
 
 import grequests
 import requests
@@ -11,6 +12,7 @@ from passlib.apps import custom_app_context as pwd_context
 from shapely.geometry import Polygon
 from shapely.wkt import dumps as wkt_dumps
 
+logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
 
@@ -83,7 +85,8 @@ class ApiOverHttp(object):
         elif req.status_code == requests.codes.not_found:
             raise Exception("Cannot find url %s" % urlparse.urljoin(self.url, url))
         elif req.status_code == requests.codes.server_error:
-            raise Exception("Server error url %s" % urlparse.urljoin(self.url, url))
+            logger.error(req.text)
+            raise Exception("Server error url %s (%d)" % (urlparse.urljoin(self.url, url)), req.status_code)
 
         return req.text
 
@@ -151,8 +154,9 @@ class Api(ApiOverHttp):
 
     def create_dataset(self, ds_obj):
         obj = serialize(ds_obj, as_json=False)
+        print 'xxx', obj
         req = self.__put_resource__("/dataset/{0}.json".format(ds_obj.entity_id), obj)
-        return req
+        return ujson.loads(req)
 
     def delete_dataset(self, entity_id):
         if type(entity_id) is str:

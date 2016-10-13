@@ -136,7 +136,7 @@ def serialize(obj, as_json=True):
     :param obj: simple python objects
     :return: json structure encoded as string, otherwise plain old Python object
     """
-    if isinstance(obj, General_Structure):
+    if isinstance(obj, object):
         result = convert_obj(obj)
     elif type(obj) is list:
         result = list()
