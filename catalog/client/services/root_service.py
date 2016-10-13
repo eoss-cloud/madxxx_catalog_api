@@ -1,5 +1,5 @@
 import falcon
-import json
+import ujson
 
 from client.services.tools import can_zip_response, compress_body
 
@@ -16,8 +16,8 @@ class RootResource(object):
         if can_zip_response(req.headers):
             resp.set_header('Content-Type', 'application/json')
             resp.set_header('Content-Encoding', 'gzip')
-            resp.body = compress_body(json.dumps(struct))
+            resp.body = compress_body(ujson.dumps(struct))
         else:
             resp.set_header('Content-Type', 'application/json')
-            resp.body = json.dumps(struct)
+            resp.body = ujson.dumps(struct)
 

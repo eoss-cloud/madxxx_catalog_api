@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf8
-import json
+import ujson
 import logging
 
 import falcon
@@ -45,7 +45,7 @@ class Sensors:
         if can_zip_response(req.headers):
             resp.set_header('Content-Type', 'application/json')
             resp.set_header('Content-Encoding', 'gzip')
-            resp.body = compress_body(json.dumps(results))
+            resp.body = compress_body(ujson.dumps(results))
         else:
             resp.set_header('Content-Type', 'application/json')
-            resp.body = json.dumps(results)
+            resp.body = ujson.dumps(results)

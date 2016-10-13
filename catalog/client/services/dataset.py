@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf8
 import cStringIO
-import json
+import ujson
 import logging
 
 import falcon
@@ -21,7 +21,7 @@ class Dataset:
         results = Persistance().delete_dataset(entity_id)
         resp.status = falcon.HTTP_200
         resp.set_header('Content-Type', 'application/json')
-        resp.body = json.dumps({'action': 'delete', 'status': 'OK', "entity_id": entity_id})
+        resp.body = ujson.dumps({'action': 'delete', 'status': 'OK', "entity_id": entity_id})
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
     def on_get(self, req, resp, entity_id):
@@ -48,7 +48,7 @@ class Dataset:
 
             if req.get_header('type') != 'webclient':
                 serialized_objs = [x['data'] for x in serialize(resultset, as_json=False)]
-                resp.body = json.dumps(serialized_objs)
+                resp.body = ujson.dumps(serialized_objs)
             else:
                 resp.body = serialize(resultset)
 
@@ -92,5 +92,5 @@ class Dataset:
             raise falcon.HTTPConflict('Dataset already exists', description,
                                       href='http://docs.example.com/auth')
 
-        resp.body = json.dumps({'status': 'OK', "new_obj_id": c.id})
+        resp.body = ujson.dumps({'status': 'OK', "new_obj_id": c.id})
         session.commit()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf8
-import json
+import ujson
 import logging
 import time
 
@@ -65,8 +65,8 @@ class Reference():
         extents = list()
         for ref_objs in ref_objects.all():
             ref_obj, geojson, extent = ref_objs
-            extents.append(json.loads(extent))
-            geoms.append(json.loads(geojson))
+            extents.append(ujson.loads(extent))
+            geoms.append(ujson.loads(geojson))
             attrs.append({"ref_name": ref_obj.ref_name,
                           "reference_id": ref_obj.ref_id,
                           'group_id': self.ref_groups[ref_obj.referencetype_id].id,
@@ -101,8 +101,8 @@ class Reference():
 
             content_type = 'text/html'
             results = j2_env.get_template('leaflet_map.html').render(title='Reference object: %s' % group_id, center='[%f, %f]' % (21.5, -102),
-                                                                zoomlevel=5, geojson=json.dumps(results['geojson']),
-                                                                extent=json.dumps(global_extent))
+                                                                zoomlevel=5, geojson=ujson.dumps(results['geojson']),
+                                                                extent=ujson.dumps(global_extent))
         else:
             description = 'Unknown format given %s.' % (format)
             raise falcon.HTTPBadRequest('Reference', description,
@@ -118,7 +118,7 @@ class Reference():
         else:
             resp.set_header('Content-Type', content_type)
             if content_type == 'application/json':
-                resp.body = json.dumps(results)
+                resp.body = ujson.dumps(results)
             else:
                 resp.body = results
         resp.status = falcon.HTTP_200
@@ -210,7 +210,7 @@ class ReferenceSearcher():
         if can_zip_response(req.headers):
             resp.set_header('Content-Type', 'application/json')
             resp.set_header('Content-Encoding', 'gzip')
-            resp.body = compress_body(json.dumps(results))
+            resp.body = compress_body(ujson.dumps(results))
         else:
             resp.set_header('Content-Type', 'application/json')
-            resp.body = json.dumps(results)
+            resp.body = ujson.dumps(results)
