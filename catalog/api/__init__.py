@@ -71,6 +71,9 @@ class General_Structure(object):
             if not "__" in x[:2]:
                 yield x, y
 
+    def __repr__(self):
+        return '<%s - (%s) >' % (self.__class__.__name__, str(dict(self)))
+
 
 # TODO: support lists and nested objects
 def deserialize(json_structure, is_string=True):
@@ -85,12 +88,22 @@ def deserialize(json_structure, is_string=True):
     else:
         obj_structure = json_structure
 
-    obj = General_Structure(obj_structure["data"], obj_structure["types"])
-    obj.__class__.__name__ = str(obj_structure["class-name"])
-    obj.__composed_at__ = str(datetime.datetime.now().replace(microsecond=0).isoformat())
-    obj.__composition__ = "(De-)Serializtation:%s" % VERSION
+    result_list = list()
+    if type(obj_structure) is list:
 
-    return obj
+        for item in obj_structure:
+            obj = General_Structure(item["data"], item["types"])
+            obj.__class__.__name__ = str(item["class-name"])
+            obj.__composed_at__ = str(datetime.datetime.now().replace(microsecond=0).isoformat())
+            obj.__composition__ = "(De-)Serializtation:%s" % VERSION
+            result_list.append(obj)
+    else:
+        obj = General_Structure(obj_structure["data"], obj_structure["types"])
+        obj.__class__.__name__ = str(obj_structure["class-name"])
+        obj.__composed_at__ = str(datetime.datetime.now().replace(microsecond=0).isoformat())
+        obj.__composition__ = "(De-)Serializtation:%s" % VERSION
+        result_list.append(obj)
+    return result_list
 
 
 def convert_obj(obj):
@@ -121,7 +134,7 @@ def serialize(obj, as_json=True):
     """
     Encode simple object with its attributes into json string used for web interchange
     :param obj: simple python objects
-    :return: json structure encoded as string
+    :return: json structure encoded as string, otherwise plain old Python object
     """
     if isinstance(obj, General_Structure):
         result = convert_obj(obj)

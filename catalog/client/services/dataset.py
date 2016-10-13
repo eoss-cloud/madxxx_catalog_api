@@ -7,6 +7,7 @@ import logging
 import falcon
 
 from api import General_Structure, max_body, serialize, deserialize
+from client.services.tools import can_zip_response, compress_body
 from model import Context
 from model.orm import Catalog_Dataset
 from .db_calls import Persistance
@@ -46,16 +47,24 @@ class Dataset:
                 x.__class__.__name__ = 'Catalog_Dataset'
                 resultset.append(x)
 
-            if req.get_header('type') != 'webclient':
+            if req.get_header('Serialization') != 'General_Structure':
                 serialized_objs = [x['data'] for x in serialize(resultset, as_json=False)]
-                resp.body = ujson.dumps(serialized_objs)
+                results = serialized_objs
             else:
-                resp.body = serialize(resultset)
+                results = serialize(resultset, as_json=False)
 
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
+
         resp.set_header('Content-Type', 'application/json')
+        if can_zip_response(req.headers):
+            resp.set_header('Content-Type', 'application/json')
+            resp.set_header('Content-Encoding', 'gzip')
+            resp.body = compress_body(ujson.dumps(results))
+        else:
+            resp.set_header('Content-Type', 'application/json')
+            resp.body = ujson.dumps(results)
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
     def on_put(self, req, resp, entity_id):
