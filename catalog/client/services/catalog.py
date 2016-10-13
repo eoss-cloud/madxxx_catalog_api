@@ -247,11 +247,12 @@ class CatalogApi(Catalog):
                 tilegrids[tile_id]['tile_identifier'] = tilegrids[tile_id]['tile_identifier'][0]
 
             tiles_dict = dict()
-            for ref_name, geom in self._query_tile_geom(tilegrids.keys()):
-                tiles_dict[ref_name] = geom
-            for tile_id in tilegrids.keys():
-                geoms.append(ujson.loads(tiles_dict[tile_id]))
-                attrs.append(tilegrids[tile_id])
+            if len(tilegrids.keys()) > 0:
+                for ref_name, geom in self._query_tile_geom(tilegrids.keys()):
+                    tiles_dict[ref_name] = geom
+                for tile_id in tilegrids.keys():
+                    geoms.append(ujson.loads(tiles_dict[tile_id]))
+                    attrs.append(tilegrids[tile_id])
             results = make_GeoJson(geoms, attrs)
         elif format.lower() == 'csv':
             rows = self._export_query(found_dataset)
