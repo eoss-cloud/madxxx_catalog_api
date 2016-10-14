@@ -5,17 +5,20 @@ import os
 import xmltodict
 from model.plain_models import GoogleLandsatContainer, S3PublicContainer, Catalog_Dataset, SentinelS3Container
 from utilities.web_utils import public_key_exists, public_get_filestream, remote_file_exists
+import logging
+import general.catalog_logger
 
 SENTINEL_S3_HTTP_ZIP_BASEURL = 'http://sentinel-s2-l1c.s3-website.eu-central-1.amazonaws.com/zips/'
 SENTINEL_S3_HTTP_BASEURL = 'http://sentinel-s2-l1c.s3-website.eu-central-1.amazonaws.com/'
 SENTINEL_S3_BUCKET = 'sentinel-s2-l1c'
 
+logger=logging.getLogger(__name__)
 
 def make_catalog_entry(s, aws_struc):
     dataset = Catalog_Dataset()
     dataset.entity_id = s["METADATA_FILE_INFO"]["LANDSAT_SCENE_ID"]
     dataset.sensor = s["PRODUCT_METADATA"]["SENSOR_ID"]
-    dataset.tile_identifier = '%03d%03d' % (int(s["PRODUCT_METADATA"]["WRS_PATH"]), int(s["PRODUCT_METADATA"]["WRS_PATH"]))
+    dataset.tile_identifier = '%03d%03d' % (int(s["PRODUCT_METADATA"]["WRS_PATH"]), int(s["PRODUCT_METADATA"]["WRS_ROW"]))
     dataset.clouds = float(s["IMAGE_ATTRIBUTES"]["CLOUD_COVER"])
 
     if int(s["PRODUCT_METADATA"]["WRS_PATH"]) > 0 and int(s["PRODUCT_METADATA"]["WRS_PATH"]) < 123:
@@ -51,7 +54,7 @@ def make_catalog_entry(s, aws_struc):
 
 
 def parse_notification_json(filename):
-    with open(in_csv, 'r') as f:
+    with open(filename, 'r') as f:
         return ujson.load(f)
 
 
@@ -150,5 +153,5 @@ def generate_s2_tile_information(tile_path):
 
         dataset.resources = container
         return dataset
-    print "WARNING: Metadata does not exist for %s" % (tile_path)
+        logger.warn( "WARNING: Metadata does not exist for %s" % (tile_path))
     return None

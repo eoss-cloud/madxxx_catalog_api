@@ -10,7 +10,7 @@ import requests
 from api.eoss_api import Api
 from harvest.sns_harvester import extract_s3_structure, parse_l1_metadata_file, get_message_type, generate_s2_tile_information
 from utilities import chunks
-import logger.catalog_logger
+import general.catalog_logger
 import logging
 
 MAX_MESSAGES = 10
@@ -20,11 +20,16 @@ logger=logging.getLogger(__name__)
 # Get the service resource
 sqs = boto3.resource('sqs')
 
+
 def remove_messages_from_queue(queue, message_list):
     for x in chunks(message_list, MAX_MESSAGES):
-        print queue.delete_messages(
-            Entries=x)
+        try:
+            queue.delete_messages(Entries=x)
+        except botocore.exceptions.ClientError, e:
+            logger.error('Error occured during clean up queue: %s'%str(e))
+    logger.info('Removing %d from %s' % (len(message_list), queue))
     return list()
+
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -33,7 +38,7 @@ def cli(*args, **kwargs):
     """
     EOSS catalog
     SNS connector
-    update catalog with sns notifications
+    update catalog with SQS notifications
     """
 
 
@@ -78,7 +83,10 @@ def update_catalog(queue_name):
 
                     try:
                         obj = parse_l1_metadata_file(req.json(), s3)
-                        print counter, obj.entity_id, api.create_dataset(obj)
+                        print counter, len(messages_to_delete), int(queue.attributes.get('ApproximateNumberOfMessages'))
+                        new_ds = api.create_dataset(obj)
+                        if not new_ds is None:
+                            print new_ds
                         counter += 1
                         messages_to_delete.append({
                             'Id': message_obj.message_id,
@@ -88,7 +96,7 @@ def update_catalog(queue_name):
                         logger.error('ERROR: metadata location structure corrupted')
                         print req.text
                     except Exception, e:
-                        logging.exception('General Error ooccured:')
+                        logging.exception('General Error ooccured')
                         should_break = True
                         if len(messages_to_delete) > 0:
                             messages_to_delete = remove_messages_from_queue(queue, messages_to_delete)
@@ -98,7 +106,10 @@ def update_catalog(queue_name):
                     obj = generate_s2_tile_information(tile_path)
                     if obj != None:
                         try:
-                            print counter, obj.entity_id, api.create_dataset(obj)
+                            print counter, len(messages_to_delete), int(queue.attributes.get('ApproximateNumberOfMessages'))
+                            new_ds =  api.create_dataset(obj)
+                            if not new_ds is None:
+                                print new_ds
                             counter += 1
                             messages_to_delete.append({
                                 'Id': message_obj.message_id,
@@ -112,14 +123,11 @@ def update_catalog(queue_name):
 
                                 # should_break = True
 
-            pprint.pprint(messages_to_delete)
-            messages_to_delete = list(messages_to_delete)
             if len(messages_to_delete) > 0:
                 try:
                     messages_to_delete = remove_messages_from_queue(queue, messages_to_delete)
                 except botocore.exceptions.ClientError, e:
-                    print e
-                    print messages_to_delete
+                    logger.exception('Error during removing processes messages in queue')
 
         time.sleep(time_interval)
 
