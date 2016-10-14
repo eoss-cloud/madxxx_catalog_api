@@ -4,14 +4,27 @@
 # Copyright EOSS GmbH 2016
 import ujson
 import sys
-
+import click
 import dateutil.parser
 import xmltodict
 from api.eoss_api import Api
+from harvest import count_lines
 from manage.sentinelcatalog import SENTINEL_S3_BUCKET, SENTINEL_S3_HTTP_ZIP_BASEURL, \
     SENTINEL_S3_HTTP_BASEURL
 from model.plain_models import SentinelS3Container, Catalog_Dataset
 from utilities.web_utils import remote_file_exists, public_key_exists, public_get_filestream
+
+
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(context_settings=CONTEXT_SETTINGS)
+@click.version_option(version='1.0.0')
+def cli(*args, **kwargs):
+    """
+    EOSS catalog
+    Catalog harvester
+    update catalog with files
+    """
+
 
 
 def sentinel_harvester(in_csv, N, M=1000):
@@ -137,30 +150,40 @@ def sentinel_harvester_line(line):
     return datasets
 
 
-def main_s2(in_csv):
+def import_from_file(in_csv, block_size):
     import pprint
-    n, m = (0, 5)
+    n, m = (0, block_size)
     api = Api()
-    for n in range(0, 10000, m):
+    for n in range(0, count_lines(in_csv), m):
         print 'Range: <%d:%d>' % (n, n + m)
         datasets = sentinel_harvester(in_csv, n, m)
-        out = api.catalog_put(datasets)
+        out = api.create_dataset(datasets)
         pprint.pprint(out)
 
 
-def main_s2a(lines):
+def import_from_pipe(lines):
     import pprint
     api = Api()
     datasets = sentinel_harvester_line(lines)
-    out = api.catalog_put(datasets)
+    out = api.create_dataset(datasets)
     pprint.pprint(out)
 
 
-if __name__ == '__main__':
+@click.argument('block_size', nargs=1)
+@click.argument('filename', nargs=1)
+@cli.command()
+def file(filename, block_size):
+    import_from_file(filename, block_size)
+
+
+@cli.command()
+def pipe():
     lines = list()
     for line in sys.stdin:
         lines.append(line.replace("\n", ""))
 
-    print "Executing harvester with %d lines ..." % len(lines)
-    # in_csv = '/Users/wehrmann/eoss/temp/s2_list32.txt'
-    main_s2a(lines)
+    import_from_pipe(lines)
+
+if __name__ == '__main__':
+    cli()
+

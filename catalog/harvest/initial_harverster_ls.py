@@ -9,6 +9,18 @@ from model.plain_models import USGSOrderContainer, GoogleLandsatContainer, S3Pub
     Catalog_Dataset
 from datetime import datetime
 from utilities.web_utils import remote_file_exists
+import click
+
+
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(context_settings=CONTEXT_SETTINGS)
+@click.version_option(version='1.0.0')
+def cli(*args, **kwargs):
+    """
+    EOSS catalog
+    Catalog harvester
+    update catalog with files
+    """
 
 
 def landsat_harvester(in_csv):
@@ -117,7 +129,7 @@ def landsat_harvester_line(lines):
     return datasets
 
 
-def main_ls(in_csv):
+def import_from_file(in_csv):
     datasets = landsat_harvester(in_csv)
 
     api = Api()
@@ -126,7 +138,7 @@ def main_ls(in_csv):
 
     for c, ds in enumerate(datasets):
         try:
-            out = api.catalog_put(ds)
+            out = api.create_dataset(ds)
 
             if not 'title' in str(out):
                 registered.append(c)
@@ -142,7 +154,7 @@ def main_ls(in_csv):
             registered = list()
 
 
-def main_ls_lines(lines):
+def import_from_pipe(lines):
     datasets = landsat_harvester_line(lines)
     api = Api()
     skipped = list()
@@ -150,7 +162,7 @@ def main_ls_lines(lines):
 
     for c, ds in enumerate(datasets):
         try:
-            out = api.catalog_put(ds)
+            out = api.create_dataset(ds)
             if not 'already' in str(out):
                 registered.append(c)
             else:
@@ -161,12 +173,21 @@ def main_ls_lines(lines):
     print 'skipped:', skipped
 
 
-if __name__ == '__main__':
+@click.argument('block_size', nargs=1)
+@click.argument('filename', nargs=1)
+@cli.command()
+def file(filename, block_size):
+    import_from_file(filename, block_size)
+
+
+@cli.command()
+def pipe():
     lines = list()
     for line in sys.stdin:
         lines.append(line.replace("\n", ""))
 
-    print "Executing harvester with %d lines ..." % len(lines)
+    import_from_pipe(lines)
 
-    # in_csv = '/Users/wehrmann/eoss/temp/s2_list32.txt'
-    main_ls_lines(lines)
+if __name__ == '__main__':
+    cli()
+

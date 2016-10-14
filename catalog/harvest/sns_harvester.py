@@ -1,7 +1,5 @@
 import ujson
 import pprint
-
-import boto3
 import dateutil.parser
 import os
 import xmltodict
@@ -30,14 +28,9 @@ def make_catalog_entry(s, aws_struc):
 
     container = dict()
     container['quicklook'] = aws_struc['quicklook']
-    sensor = dataset.sensor
-    if sensor == "OLI_TIRS":
-        sensor = "LANDSAT_8"
-
     container['metadata'] = aws_struc['metadata']
 
-    google_sensors = {'OLI_TIRS': 'L8', 'LANDSAT_ETM_SLC_OFF': 'L7', 'LANDSAT_ETM': 'L7',
-                      'LANDSAT_TM': 'L5', 'TIRS': 'L8', 'OLI': 'L8'}
+    google_sensors = GoogleLandsatContainer.supported_sensors
 
     google = GoogleLandsatContainer()
     google.link = google.base % (google_sensors[dataset.sensor],
@@ -55,17 +48,6 @@ def make_catalog_entry(s, aws_struc):
     dataset.resources = container
 
     return dataset
-
-
-def get_public_bucket_resource(bucket_name, resource, target, region):
-    from botocore import UNSIGNED
-    from botocore.client import Config
-    s3_client = boto3.client('s3', region_name=region, config=Config(signature_version=UNSIGNED))
-    print 'Getting %s' % resource
-    filename = os.path.basename(resource)
-    s3_client.download_file(bucket_name, resource, os.path.join(target, filename))
-
-    return os.path.join(target, filename)
 
 
 def parse_notification_json(filename):
@@ -90,9 +72,8 @@ def extract_s3_structure(record, type='landsat'):
 
 
 def parse_l1_metadata_file(l1_dict, s3):
-    l1 = make_catalog_entry(l1_dict[u'L1_METADATA_FILE'], s3)
 
-    return l1
+    return make_catalog_entry(l1_dict[u'L1_METADATA_FILE'], s3)
 
 
 def main_landsat(message):
@@ -171,23 +152,3 @@ def generate_s2_tile_information(tile_path):
         return dataset
     print "WARNING: Metadata does not exist for %s" % (tile_path)
     return None
-
-
-def main_sentinel2(message):
-    for tile in message[u'tiles']:
-        tile_path = tile[u'path']
-        generate_s2_tile_information(tile_path)
-
-
-if __name__ == '__main__':
-    in_csv = '/Users/wehrmann/eoss/temp/sns_sentinel.json'
-    # in_csv = '/Users/wehrmann/eoss/temp/landsat.json'
-    out_dir = '/Users/wehrmann/eoss/temp'
-    notification = parse_notification_json(in_csv)
-
-    message = ujson.loads(notification[u'Message'])
-    pprint.pprint(message)
-    if get_message_type(message) == 'landsat':
-        print main_landsat(message)
-    elif get_message_type(message) == 'sentinel2':
-        print main_sentinel2(message)
