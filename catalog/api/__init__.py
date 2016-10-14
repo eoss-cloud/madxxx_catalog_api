@@ -1,13 +1,16 @@
 import datetime
 import ujson
-
+import logging
 import dateutil.parser
 import falcon
+
+from general.catalog_exception import SerializerException
 
 VERSION = "v1"
 COMPLEX_TYPES = ["datetime", "Polygon", 'WKBElement']
 DEF_EPSG = 4326
 
+logger = logging.getLogger(__name__)
 
 def get_class_members(cls):
     """
@@ -63,7 +66,7 @@ class General_Structure(object):
             elif 'WKBElement' in types[k]:
                 print 'WKBElement'
             else:
-                raise Exception("Key:%s (%s) not supported in General_Structure - will not be skipped" % (k, types[k]))
+                raise SerializerException("Key:%s (%s) not supported in General_Structure - will not be skipped" % (k, types[k]))
 
     def __iter__(self):
         # remove 'private' attributes from object
@@ -124,7 +127,7 @@ def convert_obj(obj):
             result["data"][x] = 'SRID=%d;' % DEF_EPSG + getattr(obj, x).wkt
             var_type = 'str'
         else:
-            raise Exception("Key:%s (%s) not supported in serialization - will not be skipped" % (x, var_type))
+            raise SerializerException("Key:%s (%s) not supported in serialization - will not be skipped" % (x, var_type))
         result["types"][x] = var_type
 
     return result
@@ -167,3 +170,18 @@ def max_body(limit):
                 'Request body is too large', msg)
 
     return hook
+
+
+def dump_json():
+    pass
+
+
+def load_json(json_string):
+    if json_string not in ('', None):
+        try:
+            return ujson.loads(json_string)
+        except TypeError, e:
+            print '[%s]'%json_string
+            logger.exception('Error during json conversation')
+    else:
+        return None
