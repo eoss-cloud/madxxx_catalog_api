@@ -1,10 +1,9 @@
 import logging
 import urlparse
 import ujson
-
+import operator
 import grequests
 import requests
-from toolz.curried import operator
 
 from api import deserialize, serialize, load_json
 from general.catalog_exception import ApiException
