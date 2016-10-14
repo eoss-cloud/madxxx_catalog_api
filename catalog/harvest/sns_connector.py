@@ -137,7 +137,7 @@ def list_queues():
     print 'Found queues:'
     for q in get_all_queues():
         queue = sqs.get_queue_by_name(QueueName=q)
-        print ' * %s (%d) at %s' % (q, int(queue.attributes.get('ApproximateNumberOfMessages')), q.url)
+        print ' * %s (%d) at %s' % (q, int(queue.attributes.get('ApproximateNumberOfMessages')), queue.url)
 
 
 if __name__ == '__main__':
