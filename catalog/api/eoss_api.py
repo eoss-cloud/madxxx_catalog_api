@@ -11,18 +11,19 @@ from utilities import with_metaclass, Singleton, read_OS_var
 from passlib.apps import custom_app_context as pwd_context
 from shapely.geometry import Polygon
 from shapely.wkt import dumps as wkt_dumps
+import logger.catalog_logger
 
-logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
 
 class ApiOverHttp(object):
-    def __init__(self, url="http://localhost:8000", user=None, password='', token=None):
+    def __init__(self, url, user=None, password='', token=None):
+        logger.info('Using endpoint: %s to connect to EOSS api' % url)
         self.url = url
         self.token = token
 
         self.headers = {
-            'User-Agent': 'EOSS API 1.0',
+            'User-Agent': 'EOSS API client 1.0',
             'Accept-Encoding': 'identity, gzip',
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -50,7 +51,7 @@ class ApiOverHttp(object):
         :param password:
         :return:
         """
-        logger.info("Using %s for auth" % password)
+        logger.info("Login as %s for auth" % user)
 
         req = requests.get(urlparse.urljoin(self.url, "/auth"), headers=self.headers)
         if req.status_code == requests.codes.ok:
@@ -141,8 +142,7 @@ class Api(ApiOverHttp):
     """
 
     def __init__(self, url="http://localhost:8000", user=None, password='', token=None):
-        ApiOverHttp.__init__(self, url="http://localhost:8000", user=None, password='', token=None)
-
+        ApiOverHttp.__init__(self, url=url, user=None, password='', token=None)
 
     def get_dataset(self, entity_id):
         if not type(entity_id) is list:

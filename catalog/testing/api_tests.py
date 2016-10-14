@@ -1,8 +1,6 @@
 import unittest
 from dateutil.parser import parse
-from api import serialize, deserialize
 from api.eoss_api import Api
-from model.plain_models import Catalog_Dataset
 
 
 class ApiTest(unittest.TestCase):
@@ -14,11 +12,9 @@ class ApiTest(unittest.TestCase):
         """
         Create simple config object from string
         """
-        print self.api.get_dataset('LC81920272016240LGN00')
 
-        ds = deserialize(serialize(self.api.get_dataset('LC81920272016240LGN00')))
-        for item in ds:
-            self.assertTrue(type(item).__name__ == 'Catalog_Dataset')
+        ds=self.api.get_dataset('LC81920272016240LGN00')
+        print 'Found dataset: ', ds[0]
         self.assertEqual(len(ds), 1)
 
         ds = self.api.get_dataset('LE71010172003151EDC00')
@@ -35,17 +31,16 @@ class ApiTest(unittest.TestCase):
         aoi_sw = (aoi_nw[0], aoi_se[1])
         aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
 
+        # Object representation
         results = self.api.search_dataset(aoi, 100, parse('2015-01-01'), parse('2015-03-01'), 'landsat8', full_objects=True)
         self.assertEqual(len(results), 3)
         for item in results:
             self.assertTrue(type(item).__name__ == 'Catalog_Dataset')
 
         results = self.api.search_dataset(aoi, 100, parse('2015-01-01'), parse('2015-03-01'), 'landsat8', full_objects=False)
-        print results
+        #JSON representation
         self.assertEqual(len(results), 3)
         for item in results:
-            print type(item)
-            print item
             self.assertTrue(type(item) == dict)
 
 
