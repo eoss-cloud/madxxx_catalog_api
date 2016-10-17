@@ -31,3 +31,4 @@ dogpile.cache
 
 XlsxWriter
 
+click

@@ -1,6 +1,4 @@
 import ujson
-import pprint
-import sys
 import time
 import click
 import boto3
@@ -8,7 +6,8 @@ import botocore
 import os
 import requests
 from api.eoss_api import Api
-from harvest.sns_harvester import extract_s3_structure, parse_l1_metadata_file, get_message_type, generate_s2_tile_information
+from harvest.sns_harvester import extract_s3_structure, parse_l1_metadata_file, \
+    get_message_type, generate_s2_tile_information
 from utilities import chunks
 import general.catalog_logger
 import logging

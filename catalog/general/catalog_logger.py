@@ -5,10 +5,12 @@ from utilities import read_OS_var
 
 EOSS_notificator =  'EOSS:notification'
 
-
-class NullHandler(logging.Handler):
-    def emit(self, record):
-        pass
+try:  # Python 2.7+
+    from logging import NullHandler
+except ImportError:
+    class NullHandler(logging.Handler):
+        def emit(self, record):
+            pass
 
 
 if read_OS_var('LOGGING_CONF', mandatory=False) == None:
@@ -20,6 +22,7 @@ else:
 fileConfig(log_config_file)
 logger = logging.getLogger()
 logger.addHandler(NullHandler())
+logging.getLogger(__name__).addHandler(NullHandler())
 
 # Configure default logger to do nothing
 notificator = logging.getLogger(EOSS_notificator)

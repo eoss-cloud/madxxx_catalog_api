@@ -5,12 +5,12 @@ from dogpile.cache import register_backend
 from dogpile.cache.api import CacheBackend, NO_VALUE
 from dogpile.cache.proxy import ProxyBackend
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class LoggingProxy(ProxyBackend):
     def set(self, key, value):
-        log.debug('Setting Cache Key: %s' % key)
+        logger.debug('Setting Cache Key: %s' % key)
         self.proxied.set(key, value)
 
 

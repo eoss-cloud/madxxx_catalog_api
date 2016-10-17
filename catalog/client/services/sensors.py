@@ -6,6 +6,7 @@ import logging
 import falcon
 
 from api import General_Structure
+from client.services.root_service import struct
 from model.orm import Context
 from .db_calls import Persistance
 from .tools import can_zip_response, compress_body
@@ -16,14 +17,20 @@ logger = logging.getLogger(__name__)
 class Sensors:
     def __init__(self):
         self.logger = logging.getLogger('eoss.' + __name__)
-        self.session = Context().getSession()
+        self.default_status = falcon.HTTP_200
+        self.default_content_type = 'application/json'
+        self.headers = {'api-version': struct['version'],
+                        'Content-Type': self.default_content_type}
 
     def on_get(self, req, resp, group=None):
         """Handles GET requests
         http://localhost:8000/sensors
         http://localhost:8000/sensors/platform (sensor_level, mission, platform)
         """
+        for key, value in self.headers.iteritems():
+            resp.set_header(key, value)
 
+        # set default group to sensor_level
         if group is None:
             group = 'sensor_level'
         results = list()
@@ -37,15 +44,11 @@ class Sensors:
             results.append(x.__dict__)
 
         if len(results) == 0:
-            description = 'Group %s not found.' % group
             raise falcon.HTTPNotFound()
-        # print results
 
-        resp.status = falcon.HTTP_200
+        resp.status = self.default_status
         if can_zip_response(req.headers):
-            resp.set_header('Content-Type', 'application/json')
             resp.set_header('Content-Encoding', 'gzip')
             resp.body = compress_body(ujson.dumps(results))
         else:
-            resp.set_header('Content-Type', 'application/json')
             resp.body = ujson.dumps(results)

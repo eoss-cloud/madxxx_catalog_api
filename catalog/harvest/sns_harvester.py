@@ -1,18 +1,19 @@
+import logging
 import ujson
-import pprint
+
 import dateutil.parser
 import os
 import xmltodict
+
 from model.plain_models import GoogleLandsatContainer, S3PublicContainer, Catalog_Dataset, SentinelS3Container
 from utilities.web_utils import public_key_exists, public_get_filestream, remote_file_exists
-import logging
-import general.catalog_logger
 
 SENTINEL_S3_HTTP_ZIP_BASEURL = 'http://sentinel-s2-l1c.s3-website.eu-central-1.amazonaws.com/zips/'
 SENTINEL_S3_HTTP_BASEURL = 'http://sentinel-s2-l1c.s3-website.eu-central-1.amazonaws.com/'
 SENTINEL_S3_BUCKET = 'sentinel-s2-l1c'
 
-logger=logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
+
 
 def make_catalog_entry(s, aws_struc):
     dataset = Catalog_Dataset()
@@ -49,7 +50,6 @@ def make_catalog_entry(s, aws_struc):
 
     container.update(aws_s3.to_dict())
     dataset.resources = container
-
     return dataset
 
 
@@ -75,23 +75,7 @@ def extract_s3_structure(record, type='landsat'):
 
 
 def parse_l1_metadata_file(l1_dict, s3):
-
     return make_catalog_entry(l1_dict[u'L1_METADATA_FILE'], s3)
-
-
-def main_landsat(message):
-    for rec in message[u'Records']:
-        pprint.pprint(rec)
-        s3 = extract_s3_structure(rec)
-        s3['metadata'] = os.path.join(s3['s3_path'], s3['entity_id'] + '_MTL.txt')
-        s3['quicklook'] = os.path.join(s3['s3_path'], s3['entity_id'] + '_thumb_large.jpg')
-        pprint.pprint(s3)
-        # for f in [s3['object'], os.path.join(s3['s3_path'], s3['entity_id'] + '_MTL.json')]:
-        #    print get_public_bucket_resource(s3['bucket_name'], f, out_dir, s3['aws_region'])
-        f = os.path.join(out_dir, 'LC80290202016250LGN00_MTL.json')
-        obj = parse_l1_metadata_file(ujson.load(open(f, 'rt')), s3)
-        print obj.__dict__
-    return obj
 
 
 def get_message_type(message):
@@ -148,10 +132,12 @@ def generate_s2_tile_information(tile_path):
             container['metadata'] = metadataurl
         if remote_file_exists(SENTINEL_S3_HTTP_ZIP_BASEURL + dataset.entity_id + '.zip'):
             s3.zip = SENTINEL_S3_HTTP_ZIP_BASEURL + dataset.entity_id + '.zip'
-        if s3.zip != None or s3.bucket != None:
+        if s3.zip is not None or s3.bucket is not None:
             container.update(s3.to_dict())
 
         dataset.resources = container
         return dataset
-        logger.warn( "WARNING: Metadata does not exist for %s" % (tile_path))
-    return None
+        logger.warn("WARNING: Metadata does not exist for %s" % (tile_path))
+    else:
+        logger.warn("No quicklook and/or tileinfo metadata file in bucket found: %s" % tile_path)
+        return None

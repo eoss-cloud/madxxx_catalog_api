@@ -9,6 +9,9 @@ from shapely.wkt import dumps as wkt_dumps
 
 
 class EOSSCatalog(ICatalog):
+    """
+    EOSS Catalog interface
+    """
     def __init__(self):
         self.url = 'http://localhost:8000/catalog/search/result.json'
         self.headers = {'content-type': 'application/json'}

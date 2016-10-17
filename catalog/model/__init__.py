@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative.api import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.scoping import scoped_session
+from sqlalchemy.pool import NullPool
 
 from utilities import read_OS_var
 
@@ -41,12 +42,20 @@ class Context(object):
         :param url: sqlalchemy compatible DB url string
         :return: None - set sqlalchemy session as class attribute
         """
+        import sys, pwd, socket, os
         assert self.url != None, 'Please specify DB connection with EOSS_CATALOG_DB'
-        self.engine = create_engine(self.url)
+
+        prog = os.path.basename(sys.argv[0]) or 'eoss-api'
+        username = pwd.getpwuid(os.getuid()).pw_name
+        hostname = socket.gethostname().split(".")[0]
+
+        self.engine = create_engine(self.url, poolclass=NullPool,
+                                            connect_args = {'application_name': "%s:%s@%s" %(prog, username, hostname)},
+                                            isolation_level = "AUTOCOMMIT")
         self.getBase().metadata.create_all(self.engine)
         # metadata = schema.MetaData()
 
-        self.session_factory = sessionmaker(bind=self.engine)
+        self.session_factory = sessionmaker(bind=self.engine, autocommit=True)
         self.session = scoped_session(self.session_factory)
 
         self.base.metadata.create_all(self.engine)

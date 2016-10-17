@@ -1,22 +1,22 @@
 import logging
-import urlparse
-import ujson
 import operator
+import ujson
+import urlparse
+
 import grequests
 import requests
+from shapely.geometry import Polygon
+from shapely.wkt import dumps as wkt_dumps
 
 from api import deserialize, serialize, load_json
 from general.catalog_exception import ApiException
-from utilities import with_metaclass, Singleton, read_OS_var
-from passlib.apps import custom_app_context as pwd_context
-from shapely.geometry import Polygon
-from shapely.wkt import dumps as wkt_dumps
-import general.catalog_logger
 from general.catalog_logger import notificator
+from utilities import with_metaclass, Singleton, read_OS_var
 
 logger = logging.getLogger(__name__)
 
 API_VERSION = 'v1'
+
 
 class ApiOverHttp(object):
     def __init__(self, url, user, password, token):
@@ -29,12 +29,12 @@ class ApiOverHttp(object):
             'Accept-Encoding': 'identity, gzip',
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Serialization':'General_Structure'
+            'Serialization': 'General_Structure'
         }
-        r = requests.head(url)
+        r = requests.head(url, headers=self.headers)
         if r.status_code == requests.codes.ok:
             if r.headers.get('api-version') != API_VERSION:
-                raise ApiException('Different API version %s - needs %s' %(r.headers.get('api-version'), API_VERSION))
+                raise ApiException('Different API version %s - needs %s' % (r.headers.get('api-version'), API_VERSION))
             notificator.info('Connection to %s established' % url)
         else:
             raise ApiException('Cannot connect to API endpoint.')
@@ -48,8 +48,8 @@ class ApiOverHttp(object):
         else:
             self.password = password
 
-        #self.auth(self.user, self.password)
-        #if not self.token is None:
+        # self.auth(self.user, self.password)
+        # if not self.token is None:
         #    payload = {'User-ID': user, "Authorization": pwd_context.encrypt(password)}
         #    self.headers.update(self.payload)
 
@@ -78,12 +78,15 @@ class ApiOverHttp(object):
         if req.status_code == requests.codes.ok:
             if len(req.text) > 0:
                 return req.json()
+            else:
+                logger.warn('No content received for endpoint %s' % url)
         elif req.status_code == requests.codes.not_found:
             raise ApiException("Cannot find url %s" % urlparse.urljoin(self.url, url))
         elif req.status_code == requests.codes.server_error:
             raise ApiException("Server error url %s" % urlparse.urljoin(self.url, url))
-
-        return req.text
+        else:
+            logger.warn('Problem occured: %s' % req.text)
+            raise ApiException("General error url %s ()" % (urlparse.urljoin(self.url, url)), req.status_code)
 
     def __put_resource__(self, url, body):
         url = urlparse.urljoin(self.url, url)
@@ -99,9 +102,9 @@ class ApiOverHttp(object):
             raise Exception("Server error url %s (%d)" % (urlparse.urljoin(self.url, url)), req.status_code)
         else:
             logger.warn('[%d]: %s' % (req.status_code, str(ujson.loads(req.text)['description'])))
+            raise Exception("Server error url %s (%d)" % (urlparse.urljoin(self.url, url)), req.status_code)
 
         return None
-
 
     def __post_resource__(self, url, body):
         url = urlparse.urljoin(self.url, url)
@@ -144,6 +147,7 @@ class ApiOverHttp(object):
 
         return results
 
+
 @with_metaclass(Singleton)
 class Api(ApiOverHttp):
     """
@@ -156,30 +160,40 @@ class Api(ApiOverHttp):
         ApiOverHttp.__init__(self, url=url, user=None, password='', token=None)
 
     def get_dataset(self, entity_id):
-        if not type(entity_id) is list:
-            try:
-                obj_json = self.__get_resource__("/dataset/{0}.json".format(entity_id))
-                notificator.info('Accesing dataset %s'%entity_id)
-                return deserialize(obj_json, False)
-            except ApiException, e:
-                logger.exception('An error occurred during dataset request %s'%entity_id)
+        """
+        Get Dataset from catalog via its entity_id
 
-            else:
-                return None
+        :param entity_id: string
+        :return: list of datasets
+        """
+        try:
+            obj_json = self.__get_resource__("/dataset/{0}.json".format(entity_id))
+            notificator.info('Accesing dataset %s' % entity_id)
+            return deserialize(obj_json, False)
+        except ApiException, e:
+            logger.exception('An error occurred during dataset request %s' % entity_id)
 
     def create_dataset(self, ds_obj):
+        """
+        Register dataset in catalog
+        :param ds_obj: model.plain_models.CatalogDataset object
+        :return: json structure with its entitiy_id or None on error
+        """
         obj = serialize(ds_obj, as_json=False)
         try:
             req = self.__put_resource__("/dataset/{0}.json".format(ds_obj.entity_id), obj)
             if req != None:
-                print '[%s]' % req
                 notificator.info('Creating dataset %s' % ds_obj.entity_id)
-            return load_json((req))
+            return load_json(req)
         except ApiException, e:
-            logger.exception('An error occurred during dataset creation [%s]'%str(ds_obj))
-
+            logger.exception('An error occurred during dataset creation [%s]' % str(ds_obj))
 
     def delete_dataset(self, entity_id):
+        """
+        Delete (deregister) datasets in catalog
+        :param entity_id: string or list of strings
+        :return:
+        """
         if type(entity_id) is str:
             entity_id = [entity_id]
         for id in entity_id:
@@ -189,8 +203,17 @@ class Api(ApiOverHttp):
                 logger.exception('An error occurred during deletion of dataset [%s]' % entity_id)
         return req
 
-
-    def search_dataset(self, aoi, cloud_ratio, date_start, date_stop, platform, full_objects=False, **kwargs):
+    def search_dataset(self, aoi, cloud_ratio, date_start, date_stop, platform, full_objects=False):
+        """
+        Search datasets with different filters
+        :param aoi: list of lat/lon coordinates describing and area of interest in EPSG4326
+        :param cloud_ratio: float between 0 and 1
+        :param date_start: datetime object
+        :param date_stop: datetime object
+        :param platform: string
+        :param full_objects: if True returns CatalogObject instances, otherwise simple dictionary structure
+        :return: resultset as list of CatalogObject instances or dicts
+        """
         geometry = wkt_dumps(Polygon(aoi))
 
         params = dict()
@@ -205,7 +228,7 @@ class Api(ApiOverHttp):
         try:
             response = self.__post_resource__("catalog/search/result.json", params)
         except ApiException, e:
-            logger.exception('An error occurred during dataset search [%s]'%str(params))
+            logger.exception('An error occurred during dataset search [%s]' % str(params))
 
         id_list = set()
         for obj in response['found_dataset']:

@@ -7,6 +7,7 @@ import logging
 import falcon
 
 from api import General_Structure, max_body, serialize, deserialize
+from .root_service import struct
 from client.services.tools import can_zip_response, compress_body
 from model import Context
 from model.orm import Catalog_Dataset
@@ -17,6 +18,10 @@ logger = logging.getLogger(__name__)
 class Dataset:
     def __init__(self):
         self.logger = logging.getLogger('eoss.' + __name__)
+        self.default_status = falcon.HTTP_200
+        self.default_content_type = 'application/json'
+        self.headers = {'api-version': struct['version'],
+                        'Content-Type': self.default_content_type}
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
     def on_delete(self, req, resp, entity_id):
@@ -24,6 +29,28 @@ class Dataset:
         resp.status = falcon.HTTP_200
         resp.set_header('Content-Type', 'application/json')
         resp.body = ujson.dumps({'action': 'delete', 'status': 'OK', "entity_id": entity_id})
+
+    def _get_dataset_(self, entity_id):
+        """
+        Query dataset from catalog and convert orm object into serializable object
+        :param entity_id:
+        :return:
+        """
+        results = Persistance().get_dataset(entity_id)
+
+        values = dict()
+        types = dict()
+        result_set = list()
+        if results.count() > 0:
+            for ds in results:
+                for k, v in ds.__dict__.iteritems():
+                    if '_' != k[0]:
+                        values[k] = v
+                        types[k] = type(v)
+                x = General_Structure(values, types)
+                x.__class__.__name__ = 'Catalog_Dataset'
+                result_set.append(x)
+        return result_set
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
     def on_get(self, req, resp, entity_id):
@@ -33,47 +60,35 @@ class Dataset:
         http://localhost:8000/dataset/LC81920272016240LGN00.json
 
         """
+        for key, value in self.headers.iteritems():
+            resp.set_header(key, value)
 
-        results_set = Persistance().get_dataset(entity_id)
         results = list()
-        values = dict()
-        types = dict()
-        resultset = list()
-        if results_set.count() > 0:
-            for ds in results_set:
-                for k, v in ds.__dict__.iteritems():
-                    if '_' != k[0]:
-                        values[k] = v
-                        types[k] = type(v)
-                x = General_Structure(values, types)
-                x.__class__.__name__ = 'Catalog_Dataset'
-                resultset.append(x)
-
+        result_set = self._get_dataset_(entity_id)
+        if len(result_set) == 0:
+            resp.status = falcon.HTTP_404
+        else:
             if req.get_header('Serialization') != 'General_Structure':
                 # Return simple dict structure for web client
-                for obj in resultset:
+                for obj in result_set:
                     print obj
                     results.append(serialize(obj, as_json=False)['data'])
             else:
-                for obj in resultset:
+                for obj in result_set:
                     results.append(serialize(obj, as_json=False))
+            resp.status = self.default_status
 
-            resp.status = falcon.HTTP_200
-        else:
-            resp.status = falcon.HTTP_404
-
-        resp.set_header('Content-Type', 'application/json')
         if can_zip_response(req.headers):
-            resp.set_header('Content-Type', 'application/json')
             resp.set_header('Content-Encoding', 'gzip')
             resp.body = compress_body(ujson.dumps(results))
         else:
-            resp.set_header('Content-Type', 'application/json')
             resp.body = ujson.dumps(results)
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
     def on_put(self, req, resp, entity_id):
-        resp.set_header('Content-Type', 'application/json')
+        for key, value in self.headers.iteritems():
+            resp.set_header(key, value)
+
         output = cStringIO.StringIO()
         while True:
             chunk = req.stream.read(4096)
@@ -93,13 +108,10 @@ class Dataset:
                 session.add(c)
                 session.flush()
                 resp.status = falcon.HTTP_201
+                session.commit()
+                resp.body = ujson.dumps({'status': 'OK', "new_obj_id": c.id})
             else:
-                c = Catalog_Dataset(**dict(obj))
                 logger.warn('Dataset (%s/%s/%s) already exists' % (obj.entity_id, obj.tile_identifier, obj.acq_time))
-
                 description = 'Dataset (%s/%s/%s already exists' % (obj.entity_id, obj.tile_identifier, obj.acq_time)
                 raise falcon.HTTPConflict('Dataset already exists', description,
                                           href='http://docs.example.com/auth')
-
-        resp.body = ujson.dumps({'status': 'OK', "new_obj_id": c.id})
-        session.commit()

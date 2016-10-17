@@ -110,6 +110,11 @@ def deserialize(json_structure, is_string=True):
 
 
 def convert_obj(obj):
+    """
+    convert object into dictionary - build simple json serializable / compatible structure
+    :param obj:
+    :return:
+    """
     result = dict()
     result["class-name"] = obj.__class__.__name__
 
@@ -177,6 +182,11 @@ def dump_json():
 
 
 def load_json(json_string):
+    """
+    convert python structure into json
+    :param json_string: simple structure with attributes which can be converted by ujson lib
+    :return: json structure or none if no data was sent
+    """
     if json_string not in ('', None):
         try:
             return ujson.loads(json_string)
