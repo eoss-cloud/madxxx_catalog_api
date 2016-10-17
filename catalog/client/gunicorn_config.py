@@ -3,12 +3,12 @@
 
 bind = "unix:/tmp/gunicorn/gunicorn.sock"
 chdir = "/"
-loglevel = "INFO"
-workers = "1"
-threads = "2"
-worker_class = "gthread"
+loglevel = "DEBUG"
+workers = "2"
+threads = "4"
+worker_class = "gevent"
 reload = True
-TIMEOUT = "480"
+timeout = "480"
 errorlog = "-"
 accesslog = "-"
 name = 'EOSS-api'
