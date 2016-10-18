@@ -99,10 +99,11 @@ class ApiOverHttp(object):
             logger.error("Cannot find url %s" % urlparse.urljoin(self.url, url))
         elif req.status_code == requests.codes.server_error:
             logger.error(req.text)
-            raise Exception("Server error url %s (%d)" % (urlparse.urljoin(self.url, url)), req.status_code)
+            raise ApiException("Server error url %s (%d)" % (urlparse.urljoin(self.url, url), req.status_code))
         else:
             logger.warn('[%d]: %s' % (req.status_code, str(ujson.loads(req.text)['description'])))
-            raise Exception("Server error url %s (%d)" % (urlparse.urljoin(self.url, url)), req.status_code)
+            print '##', req
+            raise ApiException("Server error url %s (%d)" % (urlparse.urljoin(self.url, url), req.status_code))
 
         return None
 

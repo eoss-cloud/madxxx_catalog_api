@@ -2,11 +2,12 @@ import ujson
 
 import falcon
 
-from client.services.tools import can_zip_response, compress_body
+from .tools import can_zip_response, compress_body, get_base_url
 
 struct = {
     'version': 'v1',
-    'description': 'EOSS catalog api'
+    'description': 'EOSS catalog api',
+    'resources' : dict()
 }
 
 
@@ -15,15 +16,20 @@ class RootResource(object):
     Main entry point to API
     """
 
-    def __init__(self):
+    def __init__(self, my_router):
+        self.router = my_router
         self.default_status = falcon.HTTP_200
         self.default_content_type = 'application/json'
         self.headers = {'api-version': struct['version'],
                         'Content-Type': self.default_content_type}
 
     def default_response(self, req, resp):
+        BASE_URL = get_base_url(req.url)
         resp.status = self.default_status
         resp.content_type = self.default_content_type
+
+        for k,v in self.router.url_map.iteritems():
+            struct['resources'][k] = BASE_URL + v
         for key, value in self.headers.iteritems():
             resp.set_header(key, value)
 

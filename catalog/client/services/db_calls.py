@@ -34,12 +34,24 @@ class Persistance:
     def get_dataset(self, entity_id):
         return self.session.query(Catalog_Dataset).filter(Catalog_Dataset.entity_id == entity_id)
 
-    @region.cache_on_arguments()
-    def dataset_exists(self, entity_id, tile_identifier, acq_time):
-        return self.session.query(Catalog_Dataset).filter(
-            Catalog_Dataset.entity_id == entity_id).filter(
-            Catalog_Dataset.tile_identifier == tile_identifier).filter(
-            Catalog_Dataset.acq_time == acq_time)
+    def add_dataset(self, obj):
+        session = Context().getSession()
+        ds_exists = session.query(Catalog_Dataset).filter(
+            Catalog_Dataset.entity_id == obj.entity_id).filter(
+            Catalog_Dataset.tile_identifier == obj.tile_identifier).filter(
+            Catalog_Dataset.acq_time == obj.acq_time)
+        if not ds_exists.count():
+            try:
+                c = Catalog_Dataset(**dict(obj))
+                session.add(c)
+                session.commit()
+            except:
+                session.rollback()
+                raise
+            finally:
+                session.close()
+                Context().closeSession()
+        return True
 
     @region.cache_on_arguments()
     def get_all_sensor_aggregations(self):

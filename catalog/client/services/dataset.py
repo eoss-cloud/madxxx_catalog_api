@@ -5,6 +5,7 @@ import ujson
 import logging
 
 import falcon
+from sqlalchemy.exc import TimeoutError
 
 from api import General_Structure, max_body, serialize, deserialize
 from .root_service import struct
@@ -101,17 +102,18 @@ class Dataset:
         obj_list = deserialize(json_string)
 
         for obj in obj_list:
-            ds_exists = Persistance().dataset_exists(obj.entity_id, obj.tile_identifier, obj.acq_time)
-            if ds_exists.count() == 0:
-                session = Context().getSession()
-                c = Catalog_Dataset(**dict(obj))
-                session.add(c)
-                session.flush()
-                resp.status = falcon.HTTP_201
-                session.commit()
-                resp.body = ujson.dumps({'status': 'OK', "new_obj_id": c.id})
-            else:
-                logger.warn('Dataset (%s/%s/%s) already exists' % (obj.entity_id, obj.tile_identifier, obj.acq_time))
-                description = 'Dataset (%s/%s/%s already exists' % (obj.entity_id, obj.tile_identifier, obj.acq_time)
-                raise falcon.HTTPConflict('Dataset already exists', description,
-                                          href='http://docs.example.com/auth')
+            try:
+                new_dataset = Persistance().add_dataset(obj)
+                if new_dataset:
+                    resp.body = ujson.dumps({'status': 'OK', "new_obj_id": obj.entity_id})
+                    resp.status = falcon.HTTP_201
+                else:
+                    logger.warn('Dataset (%s/%s/%s) already exists' % (obj.entity_id, obj.tile_identifier, obj.acq_time))
+                    description = 'Dataset (%s/%s/%s already exists' % (obj.entity_id, obj.tile_identifier, obj.acq_time)
+                    raise falcon.HTTPConflict('Dataset already exists', description,
+                                              href='http://docs.example.com/auth')
+            except TimeoutError, e:
+                resp.body = ujson.dumps({'status': 'ERROR', "errorcode": str(e)})
+                resp.status = falcon.HTTP_500
+
+

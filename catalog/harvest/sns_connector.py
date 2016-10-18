@@ -26,7 +26,6 @@ def remove_messages_from_queue(queue, message_list):
             queue.delete_messages(Entries=x)
         except botocore.exceptions.ClientError, e:
             logger.error('Error occured during clean up queue: %s'%str(e))
-    logger.info('Removing %d from %s' % (len(message_list), queue))
     return list()
 
 
@@ -67,7 +66,7 @@ def update_catalog(queue_name):
             time_interval = 2
         logger.info('Getting messages from SQS: %s (%d sec. interval)' % (queue_name, time_interval))
 
-        for message_obj in queue.receive_messages(MaxNumberOfMessages=MAX_MESSAGES, WaitTimeSeconds=10):
+        for message_obj in queue.receive_messages(MaxNumberOfMessages=MAX_MESSAGES, WaitTimeSeconds=10, VisibilityTimeout=60,):
             messages_to_delete = list()
             notification = ujson.loads(message_obj.body)
             message = ujson.loads(notification[u'Message'])
@@ -97,6 +96,7 @@ def update_catalog(queue_name):
                     except Exception, e:
                         logging.exception('General Error ooccured')
                         should_break = True
+                    finally:
                         if len(messages_to_delete) > 0:
                             messages_to_delete = remove_messages_from_queue(queue, messages_to_delete)
             elif get_message_type(message) == 'sentinel2':
@@ -117,16 +117,16 @@ def update_catalog(queue_name):
                         except Exception, e:
                             logging.exception('General Error ooccured:')
                             should_break = True
+                        finally:
                             if len(messages_to_delete) > 0:
                                 messages_to_delete = remove_messages_from_queue(queue, messages_to_delete)
 
-                                # should_break = True
 
-            if len(messages_to_delete) > 0:
-                try:
-                    messages_to_delete = remove_messages_from_queue(queue, messages_to_delete)
-                except botocore.exceptions.ClientError, e:
-                    logger.exception('Error during removing processes messages in queue')
+        if len(messages_to_delete) > 0:
+            try:
+                messages_to_delete = remove_messages_from_queue(queue, messages_to_delete)
+            except botocore.exceptions.ClientError, e:
+                logger.exception('Error during removing processes messages in queue')
 
         time.sleep(time_interval)
 

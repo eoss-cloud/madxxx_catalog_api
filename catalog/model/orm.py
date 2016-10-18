@@ -98,3 +98,4 @@ class SensorAggregation(Context().getBase()):
     level = Column(String, ForeignKey(Catalog_Dataset.level), index=True, nullable=False)
     aggregation_type = Column(String, index=True, nullable=False)
     aggregation_name = Column(String, index=True, nullable=False)
+
