@@ -26,3 +26,24 @@ logging.getLogger(__name__).addHandler(NullHandler())
 
 # Configure default logger to do nothing
 notificator = logging.getLogger(EOSS_notificator)
+
+
+heartbeat_log = logging.getLogger('EOSS:heartbeat')
+tracer_log = logging.getLogger('EOSS:tracer')
+
+CALL = 41
+START = 42
+BEATING = 43
+STOP = 44
+STROKE = 45
+HEALTH = 46
+
+logging.addLevelName(CALL, 'CALL')
+logging.addLevelName(BEATING, 'BEATING')
+logging.addLevelName(BEATING, 'BEATING')
+logging.addLevelName(STROKE, 'STROKE')
+logging.addLevelName(HEALTH, 'HEALTH')
+
+logging.addLevelName(START, 'START BEAT')
+logging.addLevelName(STOP, 'STOP BEAT')
+
