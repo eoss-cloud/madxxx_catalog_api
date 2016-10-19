@@ -14,12 +14,16 @@ def remote_file_exists(remote_url):
     :param remote_url:  url string
     :return: True, if a request to the resource returns 200
     """
-
-    req = requests.head(remote_url)
-    if req.status_code in (requests.codes.ok, requests.codes.found):
-        return True
-    else:
+    try:
+        req = requests.head(remote_url)
+        if req.status_code in (requests.codes.ok, requests.codes.found):
+            return True
+        else:
+            return False
+    except requests.exceptions.ConnectionError, e:
+        logger.exception('Cannot connecto to %s'%remote_url)
         return False
+
 
 
 def public_key_exists(bucket_name, prefix):

@@ -47,6 +47,7 @@ class Reference():
 
         start_time = time.time()
         results = dict()
+        minx, miny, maxx, maxy = None, None, None, None
 
         if reference_id == 'all' and 'bbox' in req.params:
             minx, miny, maxx, maxy = [float(x) for x in req.params['bbox']]
@@ -102,6 +103,7 @@ class Reference():
             content_type = 'text/html'
             results = j2_env.get_template('leaflet_map.html').render(title='Reference object: %s' % group_id, center='[%f, %f]' % (21.5, -102),
                                                                 zoomlevel=5, geojson=ujson.dumps(results['geojson']),
+                                                                     label_attribute='ref_name',
                                                                 extent=ujson.dumps(global_extent))
         else:
             description = 'Unknown format given %s.' % (format)

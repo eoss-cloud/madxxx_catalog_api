@@ -78,6 +78,15 @@ class General_Structure(object):
         return '<%s - (%s) >' % (self.__class__.__name__, str(dict(self)))
 
 
+def convert_structure(obj_structure):
+    obj = General_Structure(obj_structure["data"], obj_structure["types"])
+    obj.__class__.__name__ = str(obj_structure["class-name"])
+    obj.__composed_at__ = str(datetime.datetime.now().replace(microsecond=0).isoformat())
+    obj.__composition__ = "(De-)Serializtation:%s" % VERSION
+
+    return obj
+
+
 # TODO: support lists and nested objects
 def deserialize(json_structure, is_string=True):
     """
@@ -95,17 +104,10 @@ def deserialize(json_structure, is_string=True):
     if type(obj_structure) is list:
 
         for item in obj_structure:
-            obj = General_Structure(item["data"], item["types"])
-            obj.__class__.__name__ = str(item["class-name"])
-            obj.__composed_at__ = str(datetime.datetime.now().replace(microsecond=0).isoformat())
-            obj.__composition__ = "(De-)Serializtation:%s" % VERSION
-            result_list.append(obj)
-    else:
-        obj = General_Structure(obj_structure["data"], obj_structure["types"])
-        obj.__class__.__name__ = str(obj_structure["class-name"])
-        obj.__composed_at__ = str(datetime.datetime.now().replace(microsecond=0).isoformat())
-        obj.__composition__ = "(De-)Serializtation:%s" % VERSION
-        result_list.append(obj)
+            if item is not None:
+                result_list.append(convert_structure(item))
+    elif obj_structure is not None:
+        result_list.append(convert_structure(obj_structure))
     return result_list
 
 

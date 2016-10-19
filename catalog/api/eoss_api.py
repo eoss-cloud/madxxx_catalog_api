@@ -14,6 +14,7 @@ from general.catalog_logger import notificator
 from utilities import with_metaclass, Singleton, read_OS_var
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARN)
 
 API_VERSION = 'v1'
 
@@ -81,7 +82,8 @@ class ApiOverHttp(object):
             else:
                 logger.warn('No content received for endpoint %s' % url)
         elif req.status_code == requests.codes.not_found:
-            raise ApiException("Cannot find url %s" % urlparse.urljoin(self.url, url))
+            logger.warn("Cannot find url %s" % urlparse.urljoin(self.url, url))
+            return None
         elif req.status_code == requests.codes.server_error:
             raise ApiException("Server error url %s" % urlparse.urljoin(self.url, url))
         else:

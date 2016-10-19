@@ -42,15 +42,15 @@ class Dataset:
         values = dict()
         types = dict()
         result_set = list()
-        if results.count() > 0:
-            for ds in results:
-                for k, v in ds.__dict__.iteritems():
-                    if '_' != k[0]:
-                        values[k] = v
-                        types[k] = type(v)
-                x = General_Structure(values, types)
-                x.__class__.__name__ = 'Catalog_Dataset'
-                result_set.append(x)
+        for ds in results:
+            for k, v in ds.__dict__.iteritems():
+                if '_' != k[0]:
+                    values[k] = v
+                    types[k] = type(v)
+            x = General_Structure(values, types)
+            x.__class__.__name__ = 'Catalog_Dataset'
+            result_set.append(x)
+        del results
         return result_set
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
