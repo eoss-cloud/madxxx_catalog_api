@@ -24,4 +24,5 @@ class MapResource(object):
         resp.content_type = 'text/html'
         resp.body = j2_env.get_template('leaflet_map.html').render(title='Reference object: %s' % name,
                                                                    center='[%f, %f]' % (21.5, -102),
+                                                                   label_attribute = 'ref_name',
                                                                    zoomlevel=4)

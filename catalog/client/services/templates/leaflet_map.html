@@ -34,20 +34,22 @@
 
     L.geoJson(geojsonFeature).addTo(mymap);
     mymap.fitBounds(extent);
-
+    console.log('{{ label_attribute }}');
+    if ('{{ label_attribute }}' != 'None') {
     L.geoJson(geojsonFeature, {
                 onEachFeature: function (feature, layer) {
                     var label = L.marker(layer.getBounds().getCenter(), {
                         icon: L.divIcon({
                             className: 'label',
-                            html: feature.properties.ref_name,
+                            html: feature.properties.{{ label_attribute }},
                             iconSize: [200, 80]
                         })
                     }).addTo(mymap);
                 }
             }
-    );
 
+    );
+ }
     var popup = L.popup();
 
     function onMapClick(e) {
