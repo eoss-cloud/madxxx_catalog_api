@@ -42,9 +42,13 @@
 import cStringIO as StringIO
 from urllib import urlencode
 
+import datetime
 import geojson
 import requests
 import xmltodict
+from pytz import UTC
+
+from api.eoss_api import Api
 from manage import ICatalog
 from model.plain_models import USGSOrderContainer, GoogleLandsatContainer, Catalog_Dataset
 from utilities.web_utils import remote_file_exists
@@ -138,3 +142,43 @@ class USGSCatalog(ICatalog):
 
     def register(self):
         raise Exception('Cannot register dataset in repository %s' % self.__class__.__name__)
+
+
+if __name__ == '__main__':
+    api = Api()
+    max_cloud_ratio = 0.0
+    max_black_fill = 0.1
+    ag_season_start = datetime.datetime(2016, 10, 18, tzinfo=UTC)
+    ag_season_end = ag_season_start + datetime.timedelta(days=1) #datetime.datetime(2016, 10, 19, tzinfo=UTC)
+
+
+    aoi_se = (180, -90)
+    aoi_nw = (-180, 90)
+    aoi_ne = (aoi_se[0], aoi_nw[1])
+    aoi_sw = (aoi_nw[0], aoi_se[1])
+    aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
+
+    cat = USGSCatalog(fast_load=True)
+    datasets = cat.find('LANDSAT_8', aoi, ag_season_start, ag_season_end, max_cloud_ratio)
+
+    ds_found = list()
+    ds_missing = list()
+    for counter, ds in enumerate(datasets):
+        catalog_ds = api.get_dataset(ds.entity_id)
+        if catalog_ds is None or len(catalog_ds) == 0:
+            ds_missing.append(ds)
+        elif len(catalog_ds) == 1:
+            ds_found.append(catalog_ds)
+        else:
+            print 'More in catalog found: %s (%d)' % (ds.entity_id,  len(catalog_ds))
+        if (counter % 25) == 0:
+            print counter, len(datasets)
+    print 'already registered: ', len(ds_found), len(datasets)
+    print 'missing: ',len(ds_missing), len(datasets)
+
+    for counter, ds_obj in enumerate(ds_missing):
+        new_ds = api.create_dataset(ds_obj)
+        if not new_ds is None:
+            print new_ds
+        if (counter % 25) == 0:
+            print counter, len(ds_missing)
