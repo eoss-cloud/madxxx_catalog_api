@@ -1,5 +1,6 @@
 # web api
 gevent
+gevent-psycopg2
 futures
 gunicorn
 falcon
