@@ -21,7 +21,7 @@ class Persistance:
         self.session = Context().getSession()
         self.engine = Context().get_engine()
 
-    @region.cache_on_arguments()
+    #@region.cache_on_arguments()
     def get_sensors(self, group):
         sensor_agg = func.array_agg(SensorAggregation.sensor, type_=String).label('sensor_agg')
         level_agg = func.array_agg(SensorAggregation.level, type_=String).label('level_agg')
@@ -33,7 +33,7 @@ class Persistance:
         self.session.query(Catalog_Dataset).filter(Catalog_Dataset.entity_id == entity_id).delete(synchronize_session=False)
         self.session.commit()
 
-    @region.cache_on_arguments()
+    #@region.cache_on_arguments()
     def get_dataset(self, entity_id):
         ds = self.session.query(Catalog_Dataset).filter(Catalog_Dataset.entity_id == entity_id).all()
         return ds
@@ -74,7 +74,7 @@ class Persistance:
                 Context().closeSession()
         return True
 
-    @region.cache_on_arguments()
+    #@region.cache_on_arguments()
     def get_all_sensor_aggregations(self):
         return self.session.query(SensorAggregation).all()
 
