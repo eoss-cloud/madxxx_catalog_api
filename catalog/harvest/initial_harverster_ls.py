@@ -2,25 +2,12 @@
 # coding: utf8
 # Created by sgebhardt at 30.08.16
 # Copyright EOSS GmbH 2016
-import sys
 from api.eoss_api import Api
 from manage.landsat_catalog import USGS_HTTP_SERVICE
 from model.plain_models import USGSOrderContainer, GoogleLandsatContainer, S3PublicContainer, \
     Catalog_Dataset
 from datetime import datetime
 from utilities.web_utils import remote_file_exists
-import click
-
-
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.group(context_settings=CONTEXT_SETTINGS)
-@click.version_option(version='1.0.0')
-def cli(*args, **kwargs):
-    """
-    EOSS catalog
-    Catalog harvester
-    update catalog with files
-    """
 
 
 def landsat_harvester(in_csv):
@@ -171,23 +158,3 @@ def import_from_pipe(lines):
             print e
     print 'registered:', registered
     print 'skipped:', skipped
-
-
-@click.argument('block_size', nargs=1)
-@click.argument('filename', nargs=1)
-@cli.command()
-def file(filename, block_size):
-    import_from_file(filename, block_size)
-
-
-@cli.command()
-def pipe():
-    lines = list()
-    for line in sys.stdin:
-        lines.append(line.replace("\n", ""))
-
-    import_from_pipe(lines)
-
-if __name__ == '__main__':
-    cli()
-
