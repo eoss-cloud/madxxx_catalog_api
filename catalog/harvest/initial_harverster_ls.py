@@ -1,7 +1,18 @@
-#!/usr/bin/env python
-# coding: utf8
-# Created by sgebhardt at 30.08.16
-# Copyright EOSS GmbH 2016
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog system
+Reads data provided by USGS directly via http or csv files (from http://landsat.usgs.gov/metadatalist.php) and creates Catalog_Dataset objects
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
+
 from api.eoss_api import Api
 from manage.landsat_catalog import USGS_HTTP_SERVICE, USGSCatalog
 from model.plain_models import USGSOrderContainer, GoogleLandsatContainer, S3PublicContainer, \
@@ -9,6 +20,7 @@ from model.plain_models import USGSOrderContainer, GoogleLandsatContainer, S3Pub
 import datetime
 from utilities.web_utils import remote_file_exists
 import dateutil
+
 
 def landsat_harvester(in_csv):
     datasets = []

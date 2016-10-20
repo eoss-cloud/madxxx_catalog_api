@@ -1,5 +1,18 @@
-# Created by sgebhardt at 28.09.16
-# Copyright EOSS GmbH 2016
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog system
+Implementation of urthecast catalog access
+https://developers.urthecast.com/sign-in
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
 
 import requests
 from manage import ICatalog
@@ -53,5 +66,5 @@ class UrthecastCatalog(ICatalog):
 
         return datasets
 
-    def register(self):
+    def register(self, ds):
         raise Exception('Cannot register dataset in repository %s' % self.__class__.__name__)

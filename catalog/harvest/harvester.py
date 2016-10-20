@@ -1,10 +1,27 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog system
+ Dataset harvester program
+
+ Used to update the local database with existing datasets (from catalog queries, files and or SQS messages)
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
+
 import click
-import boto3
 import sys
 
 from harvest.initial_harverster_ls import import_from_file_ls, import_from_pipe_ls, \
     import_from_landsat_catalog
-from harvest.initial_harverster import import_from_file_s2, import_from_pipe_s2, \
+from harvest.initial_harverster_s2 import import_from_file_s2, import_from_pipe_s2, \
     import_from_sentinel_catalog
 from harvest.sns_connector import list_queues, update_catalog
 

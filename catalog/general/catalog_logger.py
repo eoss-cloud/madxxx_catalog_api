@@ -1,9 +1,25 @@
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog system
+ Custom logger
+ Default configuration file within this directory is used to control logging behaviour; can be overwritten with LOGGING_CONF which points to
+ local logging configuration
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
+
 import logging
 from logging.config import fileConfig
 import os
 from utilities import read_OS_var
 
-EOSS_notificator =  'EOSS:notification'
 
 try:  # Python 2.7+
     from logging import NullHandler
@@ -25,12 +41,7 @@ logger.addHandler(NullHandler())
 logging.getLogger(__name__).addHandler(NullHandler())
 
 # Configure default logger to do nothing
-notificator = logging.getLogger(EOSS_notificator)
-
-logging.getLogger('boto3.resources.action').setLevel(logging.WARNING)
-logging.getLogger('botocore.vendored.requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
-
-
+notificator = logging.getLogger('EOSS:notification')
 heartbeat_log = logging.getLogger('EOSS:heartbeat')
 tracer_log = logging.getLogger('EOSS:tracer')
 
@@ -49,4 +60,13 @@ logging.addLevelName(HEALTH, 'HEALTH')
 
 logging.addLevelName(START, 'START BEAT')
 logging.addLevelName(STOP, 'STOP BEAT')
+
+
+
+
+# 3rd party logger configuration
+logging.getLogger('boto3.resources.action').setLevel(logging.WARNING)
+logging.getLogger('botocore.vendored.requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
+
+
 

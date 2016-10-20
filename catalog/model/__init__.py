@@ -1,5 +1,18 @@
-# Created by sgebhardt at 16.08.16
-# Copyright EOSS GmbH 2016
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog system
+catalog objects model package
+The OS variable EOSS_CATALOG_DB specifies the location / access of the database. Because we use geoalchemy2 a postgres/postgis database is necesarry.
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
 
 import gevent
 import gevent.monkey
@@ -12,7 +25,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.scoping import scoped_session
 import sys, pwd, socket, os
 
-from sqlalchemy.pool import QueuePool, NullPool
+from sqlalchemy.pool import NullPool
 
 from utilities import read_OS_var
 

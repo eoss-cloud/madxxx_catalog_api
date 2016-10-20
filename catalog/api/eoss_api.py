@@ -1,3 +1,19 @@
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog API module
+accessing EOSS catalog functionality via python
+direct communication with API right now doesnt need authentification; later API_USER and API_PASSWORD variables are used to provide these credentials
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
+
 import logging
 import operator
 import ujson

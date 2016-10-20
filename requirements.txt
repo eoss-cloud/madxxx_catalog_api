@@ -34,3 +34,8 @@ dogpile.cache
 XlsxWriter
 
 click
+
+# harvester deps
+boto3
+grequests
+decorator

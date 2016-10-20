@@ -1,7 +1,19 @@
-#!/usr/bin/env python
-# coding: utf8
-# Created by sgebhardt at 30.08.16
-# Copyright EOSS GmbH 2016
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog system
+Reads sentinel2 data which is stored in AWS buckets extracted with 'aws s3 ls sentinel-s2-l1c/products/ --recursive --region=eu-central-1 | grep productInfo.json'
+[
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
+
 import ujson
 import dateutil.parser
 import xmltodict
@@ -80,7 +92,7 @@ def sentinel_harvester(in_csv, N, M=1000):
     return datasets
 
 
-def sentinel_harvester_line(line):
+def sentinel_harvester_line(lines):
     datasets = []
     for line in lines:
         content_list = line.split(' ')

@@ -1,44 +1,20 @@
-# _____________________________________________________________________
-# | ................................................................... |
-# | ................................................@@@@............... |
-# | .@...........................................@@@@@@@@@..@@@@....... |
-# | .@@@........................................@@.......@@@@@@@@@@.... |
-# | .@.@@@.....................................@.........@.......@@.... |
-# | .@...@@@...................................@........@.............. |
-# | .@.....@@@.............@@@@@@@@@@@@.......@@.......@............... |
-# | .@.......@@@.........@@@.........@@@@.....@........@............... |
-# | .@@........@@@.....@@...............@@@...@@.......@............... |
-# | .@@...........@@@.@...................@@...@.......@............... |
-# | .@@.............@@@....................@@..@@......@@.............. |
-# | .@@.............@..@@@..................@@..@@......@@............. |
-# | .@@............@......@@@................@@..@@@....@@@............ |
-# | .@@...........@..........@@@..............@...@@@@....@@@.......... |
-# | .@@...........@.............@@@@..........@@....@@@@...@@@@........ |
-# | .@@...........@.................@@@@@......@.......@@@...@@@@...... |
-# | .@@@@........@......................@@@@@@@@.........@@.....@@@.... |
-# | .@@@@@@......@.............................@..........@@.....@@@... |
-# | .@@..@@@@....@.............................@...........@@......@@.. |
-# | .@@.....@@@@.@.............................@............@@......@@. |
-# | .@@.......@@@@@............................@.............@.......@@ |
-# | .@@.........@@@@@..........................@.............@.......@@ |
-# | .@............@@@@@.......................@..............@.......@@ |
-# | .@............@@..@@@@....................@..............@........@ |
-# | .@.............@@...@@@@@................@...............@........@ |
-# | .@.............@@@.....@@@@@@...........@@..............@.........@ |
-# | .@..............@@@........@@@@@@......@@..............@.........@. |
-# | @@@@.............@@@...........@@@@@@@@@...........@@@@.........@.. |
-# | ..@@@@@@...........@@@.............@@@@@@@@@@@@@@@@@...........@... |
-# | .....@@@@@@@.........@@@@@......@@@@..........................@.... |
-# | ..........@@@@@@@......@@@@@@@@@@@..........................@@..... |
-# | ...............@@@@@@@@..................................@@@....... |
-# | ....................@@@@@@@@@@@......................@@@@@......... |
-# | ...........................@@@@@@@@@@@@@@@@@@@@@@@@@@@............. |
-# | .....................................@@@@@@@@@@@................... |
-# | ................................................................... |
-# | ___________________________________________________________________ |
-#
-# Created by sgebhardt at 15.08.16
-# Copyright EOSS GmbH 2016
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog system
+Implementation of ESA sentinel1/2 catalog access
+(https://scihub.copernicus.eu)
+Users need to register at the scihub page to get access to their catalog system. These credentials are set by SENTINEL_USER and SENTINEL_PASSWORD
+
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
 
 import requests
 from manage import ICatalog
@@ -84,11 +60,9 @@ class SentinelCatalog(ICatalog):
         query = ''.join([acquisition_date, query_area])
 
         response = requests.post(self.url, dict(q=query), auth=session.auth)
-        assert response.status_code == requests.codes.ok, 'Connection to copernicus server went wrong [%d]. Please check %s' % (response.status_code, self.url)
-        print response.json().keys()
+        assert response.status_code == requests.codes.ok, 'Connection to copernicus server went wrong [%d]. Please check %s. \\n%s' % \
+                                                          (response.status_code, self.url, response.text)
         products = response.json()['feed']['entry']
-
-
         datasets = set()
 
         for p in products:
@@ -125,56 +99,7 @@ class SentinelCatalog(ICatalog):
 
                 datasets.add(ds)
 
-                # ds = Dataset()
-                # ds.identifier = p['title']
-                # coord_list = next(x for x in p["str"] if x["name"] == "footprint")["content"][10:-2].split(",")
-                # coord_list_split = [coord.split(" ") for coord in coord_list]
-                # g1 = geojson.Polygon([[
-                #                             tuple((float(coord[0]), float(coord[1])))
-                #                             for coord in coord_list_split
-                #                             ]])
-                # g2 = shape(g1)
-                # ds.extent = WKTElement(g2.wkt,srid=4326)
-                # ds.time_created = next(x for x in p["date"] if x["name"] == "beginposition")["content"]
-                # ds.uuid = uuid4()
-                #
-                # properties = dict()
-                # properties['id'] = p['id']
-                # properties['link'] = next(x for x in p["link"] if len(x.keys()) == 1)["href"]
-                # str_properties = ["platformname", "identifier", "filename",
-                #                   "instrumentshortname", "instrumentname", "orbitdirection",
-                #                   "size"]
-                # for str_prop in str_properties:
-                #     properties.update(
-                #         {str_prop: next(x for x in p["str"] if x["name"] == str_prop)["content"]}
-                #     )
-                # ds.properties = properties
-                #
-                # cop = CopernicusSciHubContainer()
-                # cop.http = properties['link'].replace('\\','')
-                # container=cop.to_dict()
-                #
-                # s3 = S3PublicContainer()
-                # if remote_file_exists(SENTINEL_S3_HTTP_ZIP_BASEURL + ds.identifier + '.zip'):
-                #     s3.http = SENTINEL_S3_HTTP_ZIP_BASEURL + ds.identifier + '.zip'
-                # if public_key_exists('sentinel-s2-l1c', 'zips/%s.zip' % ds.identifier):
-                #     s3.bucket = SENTINEL_S3_BUCKET
-                #     s3.prefix = 'zips/%s.zip' % ds.identifier
-                # if s3.http != None or s3.bucket != None:
-                #     container.update(s3.to_dict())
-                #     # print s3.to_dict()
-                # ds.container = container
-                #
-
-
-
-
-                # if provider=='sentinel2' and properties['platformname'] == 'Sentinel-2':
-                #     datasets.add(ds)
-                # elif provider=='sentinel1' and properties['platformname'] == 'Sentinel-1':
-                #     datasets.add(ds)
-
         return datasets
 
-    def register(self):
+    def register(self, ds):
         raise Exception('Cannot register dataset in repository %s' % self.url)

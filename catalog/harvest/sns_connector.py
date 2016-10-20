@@ -1,17 +1,28 @@
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog system
+Connects to AWS sqs system and polls notifications created by sentinel2/landsat s3 ingestion processes
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
+
 import ujson
 import time
 import boto3
 import botocore
 import os
 import requests
-import datetime
 from api.eoss_api import Api
 from harvest.sns_harvester import extract_s3_structure, parse_l1_metadata_file, \
     get_message_type, generate_s2_tile_information
-from manage.landsat_catalog import USGSCatalog
-from manage.sentinelcatalog import SentinelCatalog
 from utilities import chunks
-import general.catalog_logger
 import logging
 
 MAX_MESSAGES = 10
@@ -26,7 +37,6 @@ def remove_messages_from_queue(queue, message_list):
         except botocore.exceptions.ClientError, e:
             logger.error('Error occured during clean up queue: %s'%str(e))
     return list()
-
 
 
 def get_all_queues():
@@ -110,7 +120,6 @@ def update_catalog(queue_name, api_endpoint):
                             if len(messages_to_delete) > 0:
                                 messages_to_delete = remove_messages_from_queue(queue, messages_to_delete)
 
-
         if len(messages_to_delete) > 0:
             try:
                 messages_to_delete = remove_messages_from_queue(queue, messages_to_delete)
@@ -127,11 +136,4 @@ def list_queues():
     for q in get_all_queues():
         queue = sqs.get_queue_by_name(QueueName=q)
         print ' * %s (%d) at %s' % (q, int(queue.attributes.get('ApproximateNumberOfMessages')), queue.url)
-
-
-
-
-
-if __name__ == '__main__':
-    cli()
 

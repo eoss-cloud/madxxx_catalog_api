@@ -1,5 +1,18 @@
-# Created by sgebhardt at 16.08.16
-# Copyright EOSS GmbH 2016
+#-*- coding: utf-8 -*-
+
+""" EOSS catalog system
+catalog objects ORM model used for the db connection
+"""
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
+
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, Float
 from sqlalchemy.dialects.postgresql import JSONB
