@@ -30,6 +30,7 @@ def remove_messages_from_queue(queue, message_list):
 
 
 def get_all_queues():
+    sqs = boto3.resource('sqs')
     queue_names = list()
     for q in sqs.queues.all():
         queue_names.append( q.url[q.url.rfind('/') + 1:])

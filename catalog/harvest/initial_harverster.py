@@ -140,7 +140,7 @@ def sentinel_harvester_line(line):
     return datasets
 
 
-def import_from_file(in_csv, block_size):
+def import_from_file_s2(in_csv, block_size):
     import pprint
     n, m = (0, block_size)
     api = Api()
@@ -151,7 +151,7 @@ def import_from_file(in_csv, block_size):
         pprint.pprint(out)
 
 
-def import_from_pipe(lines):
+def import_from_pipe_s2(lines):
     import pprint
     api = Api()
     datasets = sentinel_harvester_line(lines)
@@ -159,13 +159,13 @@ def import_from_pipe(lines):
     pprint.pprint(out)
 
 
-def import_from_sentinel_catalog(sensor,start_date):
+def import_from_sentinel_catalog(sensor,start_date, api_url):
     import numpy
-    api = Api()
+    api = Api(api_url)
 
     max_cloud_ratio = 1.0
-    ag_season_start = datetime.strptime(start_date, '%Y-%m-%d')
-    ag_season_end = datetime.datetime.now()
+    ag_season_start = dateutil.parser.parse(start_date)
+    ag_season_end = ag_season_start + datetime.timedelta(days=1)
 
     for lon in numpy.arange(-180,180,9):
         for lat in numpy.arange(-90,90,9):

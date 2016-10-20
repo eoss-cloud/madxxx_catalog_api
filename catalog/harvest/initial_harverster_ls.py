@@ -6,9 +6,9 @@ from api.eoss_api import Api
 from manage.landsat_catalog import USGS_HTTP_SERVICE, USGSCatalog
 from model.plain_models import USGSOrderContainer, GoogleLandsatContainer, S3PublicContainer, \
     Catalog_Dataset
-from datetime import datetime
+import datetime
 from utilities.web_utils import remote_file_exists
-
+import dateutil
 
 def landsat_harvester(in_csv):
     datasets = []
@@ -81,9 +81,9 @@ def landsat_harvester_line(lines):
             dataset.clouds = float(content_list[19])
             dataset.daynight = str.lower(content_list[24])
             if dataset.sensor == "LANDSAT_TM":
-                dataset.acq_time = datetime.strptime(content_list[29][:-6], '%Y:%j:%H:%M:%S')
+                dataset.acq_time = datetime.datetime.strptime(content_list[29][:-6], '%Y:%j:%H:%M:%S')
             else:
-                dataset.acq_time = datetime.strptime(content_list[29][:-8], '%Y:%j:%H:%M:%S')
+                dataset.acq_time = datetime.datetime.strptime(content_list[29][:-8], '%Y:%j:%H:%M:%S')
             dataset.level = content_list[53]
 
             container = dict()
@@ -116,7 +116,7 @@ def landsat_harvester_line(lines):
     return datasets
 
 
-def import_from_file(in_csv):
+def import_from_file_ls(in_csv):
     datasets = landsat_harvester(in_csv)
 
     api = Api()
@@ -141,7 +141,7 @@ def import_from_file(in_csv):
             registered = list()
 
 
-def import_from_pipe(lines):
+def import_from_pipe_ls(lines):
     datasets = landsat_harvester_line(lines)
     api = Api()
     skipped = list()
@@ -160,12 +160,12 @@ def import_from_pipe(lines):
     print 'skipped:', skipped
 
 
-def import_from_landsat_catalog(sensor,start_date):
-    api = Api()
+def import_from_landsat_catalog(sensor,start_date, api_url):
+    api = Api(api_url)
 
     max_cloud_ratio = 1.0
-    ag_season_start = datetime.strptime(start_date, '%Y-%m-%d')
-    ag_season_end = datetime.datetime.now()
+    ag_season_start = dateutil.parser.parse(start_date)
+    ag_season_end = ag_season_start + datetime.timedelta(days=1)
     aoi_se = (180, -90)
     aoi_nw = (-180, 90)
     aoi_ne = (aoi_se[0], aoi_nw[1])
