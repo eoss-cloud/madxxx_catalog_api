@@ -1,4 +1,4 @@
-from toolz.curried import operator
+import operator
 
 from api.eoss_api import Api
 from dateutil.parser import parse
