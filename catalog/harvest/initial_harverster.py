@@ -3,8 +3,6 @@
 # Created by sgebhardt at 30.08.16
 # Copyright EOSS GmbH 2016
 import ujson
-import sys
-import click
 import dateutil.parser
 import xmltodict
 from api.eoss_api import Api
@@ -13,18 +11,6 @@ from manage.sentinelcatalog import SENTINEL_S3_BUCKET, SENTINEL_S3_HTTP_ZIP_BASE
     SENTINEL_S3_HTTP_BASEURL
 from model.plain_models import SentinelS3Container, Catalog_Dataset
 from utilities.web_utils import remote_file_exists, public_key_exists, public_get_filestream
-
-
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.group(context_settings=CONTEXT_SETTINGS)
-@click.version_option(version='1.0.0')
-def cli(*args, **kwargs):
-    """
-    EOSS catalog
-    Catalog harvester
-    update catalog with files
-    """
-
 
 
 def sentinel_harvester(in_csv, N, M=1000):
@@ -167,23 +153,4 @@ def import_from_pipe(lines):
     datasets = sentinel_harvester_line(lines)
     out = api.create_dataset(datasets)
     pprint.pprint(out)
-
-
-@click.argument('block_size', nargs=1)
-@click.argument('filename', nargs=1)
-@cli.command()
-def file(filename, block_size):
-    import_from_file(filename, block_size)
-
-
-@cli.command()
-def pipe():
-    lines = list()
-    for line in sys.stdin:
-        lines.append(line.replace("\n", ""))
-
-    import_from_pipe(lines)
-
-if __name__ == '__main__':
-    cli()
 

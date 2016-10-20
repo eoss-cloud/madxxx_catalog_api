@@ -1,6 +1,5 @@
 import ujson
 import time
-import click
 import boto3
 import botocore
 import os
@@ -16,9 +15,6 @@ MAX_MESSAGES = 10
 
 logger=logging.getLogger(__name__)
 
-# Get the service resource
-sqs = boto3.resource('sqs')
-
 
 def remove_messages_from_queue(queue, message_list):
     for x in chunks(message_list, MAX_MESSAGES):
@@ -29,16 +25,6 @@ def remove_messages_from_queue(queue, message_list):
     return list()
 
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.group(context_settings=CONTEXT_SETTINGS)
-@click.version_option(version='1.0.0')
-def cli(*args, **kwargs):
-    """
-    EOSS catalog
-    SNS connector
-    update catalog with SQS notifications
-    """
-
 
 def get_all_queues():
     queue_names = list()
@@ -48,10 +34,9 @@ def get_all_queues():
     return queue_names
 
 
-@cli.command()
-@click.argument('queue_name', nargs=1)
-def update_catalog(queue_name):
-    api = Api()
+def update_catalog(queue_name, api_endpoint):
+    api = Api(api_endpoint)
+    sqs = boto3.resource('sqs')
 
     if queue_name not in get_all_queues():
         raise Exception('Queue %s does not exist in %s' % (queue_name, get_all_queues()))
@@ -131,14 +116,12 @@ def update_catalog(queue_name):
         time.sleep(time_interval)
 
 
-@cli.command()
 def list_queues():
+    sqs = boto3.resource('sqs')
+
     print 'Found queues:'
     for q in get_all_queues():
         queue = sqs.get_queue_by_name(QueueName=q)
         print ' * %s (%d) at %s' % (q, int(queue.attributes.get('ApproximateNumberOfMessages')), queue.url)
 
-
-if __name__ == '__main__':
-    cli()
 
