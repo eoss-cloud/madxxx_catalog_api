@@ -145,7 +145,7 @@ class USGSCatalog(ICatalog):
 
 
 if __name__ == '__main__':
-    api = Api()
+    api = Api(url='http://api.eoss.cloud')
     max_cloud_ratio = 0.0
     max_black_fill = 0.1
     ag_season_start = datetime.datetime(2016, 10, 18, tzinfo=UTC)
