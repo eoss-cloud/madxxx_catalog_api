@@ -67,7 +67,7 @@ class SentinelCatalog(ICatalog):
         self.user = read_OS_var('SENTINEL_USER', mandatory=True)
         self.pwd = read_OS_var('SENTINEL_PASSWORD', mandatory=True)
 
-    def find(self, provider, aoi, date_start, date_stop):
+    def find(self, provider, aoi, date_start, date_stop, clouds=None):
         session = requests.Session()
         session.auth = (self.user, self.pwd)
         session.stream = True
