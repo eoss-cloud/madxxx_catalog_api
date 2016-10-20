@@ -20,21 +20,21 @@ def cli(*args, **kwargs):
     """
 
 
-@cli.command('queue update', short_help='update catalog with SQS queue')
+@cli.command('queue_update', short_help='update catalog with SQS queue')
 @click.argument('queue_name', nargs=1)
 @click.argument('api_endpoint', nargs=1, required=False,  default='http://api.eoss.cloud')
 def update_catalog_queue(queue_name, api_endpoint):
     update_catalog(queue_name, api_endpoint)
 
 
-@cli.command('queue list', short_help='list all available queues')
+@cli.command('queue_list', short_help='list all available queues')
 def list_available_queues():
     list_queues()
 
 
 @click.argument('block_size', nargs=1)
 @click.argument('filename', nargs=1)
-@cli.command('file import landsat', short_help='update catalog with exported landsat metadata file')
+@cli.command('file_import_landsat', short_help='update catalog with exported landsat metadata file')
 def file(filename, block_size):
     import_from_file_ls(filename, block_size)
 
@@ -50,7 +50,7 @@ def pipe():
 
 @click.argument('block_size', nargs=1)
 @click.argument('filename', nargs=1)
-@cli.command('file import sentinel2', short_help='update catalog with exported sentinel2 metadata file')
+@cli.command('file_import_sentinel2', short_help='update catalog with exported sentinel2 metadata file')
 def file(filename, block_size):
     import_from_file_s2(filename, block_size)
 
@@ -63,7 +63,7 @@ def pipe():
 
     import_from_pipe_s2(lines)
 
-@cli.command('catalog import', short_help='update catalog with provider catalog queries')
+@cli.command('catalog_import', short_help='update catalog with provider catalog queries')
 @click.argument('sensor', nargs=1)
 @click.argument('start_date', nargs=1)
 def synchronize_catalog(sensor,start_date):
