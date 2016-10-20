@@ -160,45 +160,52 @@ def import_from_pipe(lines):
 
 
 def import_from_sentinel_catalog(sensor,start_date):
+    import numpy
     api = Api()
 
     max_cloud_ratio = 1.0
     ag_season_start = datetime.strptime(start_date, '%Y-%m-%d')
     ag_season_end = datetime.datetime.now()
-    aoi_se = (180, -90)
-    aoi_nw = (-180, 90)
-    aoi_ne = (aoi_se[0], aoi_nw[1])
-    aoi_sw = (aoi_nw[0], aoi_se[1])
-    aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
 
-    datasets = None
+    for lon in numpy.arange(-180,180,9):
+        for lat in numpy.arange(-90,90,9):
+            lon_end = lon + 9
+            lat_end = lat + 9
 
-    cat = SentinelCatalog()
-    datasets = cat.find(sensor, aoi, ag_season_start, ag_season_end, max_cloud_ratio)
+            aoi_se = (lon_end, lat)
+            aoi_nw = (lon, lat_end)
+            aoi_ne = (aoi_se[0], aoi_nw[1])
+            aoi_sw = (aoi_nw[0], aoi_se[1])
+            aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
+
+            datasets = None
+
+            cat = SentinelCatalog()
+            datasets = cat.find(sensor, aoi, ag_season_start, ag_season_end, max_cloud_ratio)
 
 
-    if datasets != None:
-        ds_found = list()
-        ds_missing = list()
-        for counter, ds in enumerate(datasets):
-            catalog_ds = api.get_dataset(ds.entity_id)
-            if catalog_ds is None or len(catalog_ds) == 0:
-                ds_missing.append(ds)
-            elif len(catalog_ds) == 1:
-                ds_found.append(catalog_ds)
+            if datasets != None:
+                ds_found = list()
+                ds_missing = list()
+                for counter, ds in enumerate(datasets):
+                    catalog_ds = api.get_dataset(ds.entity_id)
+                    if catalog_ds is None or len(catalog_ds) == 0:
+                        ds_missing.append(ds)
+                    elif len(catalog_ds) == 1:
+                        ds_found.append(catalog_ds)
+                    else:
+                        print 'More in catalog found: %s (%d)' % (ds.entity_id, len(catalog_ds))
+                    if (counter % 25) == 0:
+                        print counter, len(datasets)
+                print 'already registered: ', len(ds_found), len(datasets)
+                print 'missing: ', len(ds_missing), len(datasets)
+
+                for counter, ds_obj in enumerate(ds_missing):
+                    new_ds = api.create_dataset(ds_obj)
+                    if not new_ds is None:
+                        print new_ds
+                    if (counter % 25) == 0:
+                        print counter, len(ds_missing)
             else:
-                print 'More in catalog found: %s (%d)' % (ds.entity_id, len(catalog_ds))
-            if (counter % 25) == 0:
-                print counter, len(datasets)
-        print 'already registered: ', len(ds_found), len(datasets)
-        print 'missing: ', len(ds_missing), len(datasets)
-
-        for counter, ds_obj in enumerate(ds_missing):
-            new_ds = api.create_dataset(ds_obj)
-            if not new_ds is None:
-                print new_ds
-            if (counter % 25) == 0:
-                print counter, len(ds_missing)
-    else:
-        print 'No data found in catalog for %s from %s to %s' % (
-        sensor, ag_season_start.strftime("%Y-%m-%d"), ag_season_end.strftime("%Y-%m-%d"))
+                print 'No data found in catalog for %s from %s to %s' % (
+                sensor, ag_season_start.strftime("%Y-%m-%d"), ag_season_end.strftime("%Y-%m-%d"))
