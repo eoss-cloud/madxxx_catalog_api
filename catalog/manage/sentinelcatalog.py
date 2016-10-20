@@ -84,8 +84,10 @@ class SentinelCatalog(ICatalog):
         query = ''.join([acquisition_date, query_area])
 
         response = requests.post(self.url, dict(q=query), auth=session.auth)
-        assert response.status_code == requests.codes.ok, 'Connection to copernicos server went wrong. Please check %s' % self.url
+        assert response.status_code == requests.codes.ok, 'Connection to copernicus server went wrong [%d]. Please check %s' % (response.status_code, self.url)
+        print response.json().keys()
         products = response.json()['feed']['entry']
+
 
         datasets = set()
 

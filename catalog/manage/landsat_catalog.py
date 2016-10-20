@@ -108,16 +108,11 @@ class USGSCatalog(ICatalog):
             datasets = set()
             if 'metaData' in xml[u'searchResponse'].keys():
                 for ds in xml[u'searchResponse']['metaData']:
-                    g1 = geojson.Polygon([[float(ds['upperLeftCornerLongitude']), float(ds['upperLeftCornerLatitude']),
-                                           float(ds['lowerLeftCornerLongitude']), float(ds['lowerLeftCornerLatitude']),
-                                           float(ds['lowerRightCornerLongitude']), float(ds['lowerRightCornerLatitude']),
-                                           float(ds['upperRightCornerLongitude']), float(ds['upperRightCornerLatitude']),
-                                           float(ds['upperLeftCornerLongitude']), float(ds['upperLeftCornerLatitude'])]])
                     eoss_ds = Catalog_Dataset()
                     eoss_ds.entity_id = ds['sceneID']
                     eoss_ds.acq_time = ds['acquisitionDate']
                     eoss_ds.sensor = ds['sensor']
-                    eoss_ds.tile_identifier = '%s%s' % (ds['path'], ds['row'])
+                    eoss_ds.tile_identifier = '%03d%03d' % (int(ds['path']), int(ds['row']))
                     eoss_ds.clouds = ds['cloudCoverFull']
                     eoss_ds.level = ds['DATA_TYPE_L1']
                     eoss_ds.daynight = ds['dayOrNight']
@@ -142,7 +137,7 @@ class USGSCatalog(ICatalog):
                             eoss_ds.resources = container
 
                     datasets.add(eoss_ds)
-
+        logger.info('Found %d datasets...' % len(datasets))
         return datasets
 
     def register(self):

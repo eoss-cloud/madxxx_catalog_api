@@ -76,6 +76,9 @@ def synchronize_catalog(sensor, start_date, api_endpoint):
         import_from_landsat_catalog("LANDSAT_ETM", start_date, api_endpoint)  # "LANDSAT_8", "LANDSAT_ETM_SLC_OFF", "LANDSAT_ETM"
     elif sensor == 'landsat7off':
         import_from_landsat_catalog("LANDSAT_ETM_SLC_OFF", start_date, api_endpoint)  # "LANDSAT_8", "LANDSAT_ETM_SLC_OFF", "LANDSAT_ETM"
+    else:
+        print 'Please specify sensor as following, e.g. sentinel2, landsat8, landsat7, landsat7off'
+
 
 if __name__ == '__main__':
     cli()

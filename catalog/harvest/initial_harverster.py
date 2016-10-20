@@ -178,8 +178,6 @@ def import_from_sentinel_catalog(sensor,start_date, api_url):
             aoi_sw = (aoi_nw[0], aoi_se[1])
             aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
 
-            datasets = None
-
             cat = SentinelCatalog()
             datasets = cat.find(sensor, aoi, ag_season_start, ag_season_end, max_cloud_ratio)
 

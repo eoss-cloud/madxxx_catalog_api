@@ -175,7 +175,6 @@ def import_from_landsat_catalog(sensor,start_date, api_url):
     cat = USGSCatalog()
     # "LANDSAT_8", "LANDSAT_ETM_SLC_OFF", "LANDSAT_ETM"
     datasets = cat.find(sensor, aoi, ag_season_start, ag_season_end, max_cloud_ratio)
-    print 'Found dataset: %d' % len(datasets)
 
     if datasets != None:
         ds_found = list()
