@@ -23,12 +23,8 @@ class Queue(object):
         print(queue.attributes.get('DelaySeconds'))
 
     def send(self, body):
-        # Get the queue
         queue = self.sqs.get_queue_by_name(QueueName=self.queue_name)
-
-        # Create a new message
         response = queue.send_message(MessageBody=ujson.dumps(body))
-        #print response
 
 
     def get_messages(self):
@@ -37,13 +33,6 @@ class Queue(object):
 
         # Process messages by printing out body and optional author name
         for message in queue.receive_messages(MaxNumberOfMessages=MAX_MESSAGES, WaitTimeSeconds=10, VisibilityTimeout=60,):
-            # Get the custom author message attribute if it was set
-
-            # Print out the body and author (if set)
-
-
-            # Let the queue know that the message is processed
-            #message.delete()
             yield message
 
     def delete_message(self, message):
