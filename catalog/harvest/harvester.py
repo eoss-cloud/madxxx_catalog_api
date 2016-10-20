@@ -2,8 +2,10 @@ import click
 import boto3
 import sys
 
-from harvest.initial_harverster_ls import import_from_file as import_from_file_ls, import_from_pipe as import_from_pipe_ls
-from harvest.initial_harverster import import_from_file as import_from_file_s2, import_from_pipe as import_from_pipe_s2
+from harvest.initial_harverster_ls import import_from_file as import_from_file_ls, import_from_pipe as import_from_pipe_ls, \
+    import_from_landsat_catalog
+from harvest.initial_harverster import import_from_file as import_from_file_s2, import_from_pipe as import_from_pipe_s2, \
+    import_from_sentinel_catalog
 from harvest.sns_connector import list_queues, update_catalog
 
 
@@ -61,7 +63,18 @@ def pipe():
 
     import_from_pipe_s2(lines)
 
-
+@cli.command()
+@click.argument('sensor', nargs=1)
+@click.argument('start_date', nargs=1)
+def synchronize_catalog(sensor,start_date):
+    if sensor == 'sentinel2':
+        import_from_sentinel_catalog(sensor,start_date)
+    elif sensor == 'landsat8':
+        import_from_landsat_catalog( "LANDSAT_8",start_date) # "LANDSAT_8", "LANDSAT_ETM_SLC_OFF", "LANDSAT_ETM"
+    elif sensor == 'landsat7':
+        import_from_landsat_catalog("LANDSAT_ETM", start_date)  # "LANDSAT_8", "LANDSAT_ETM_SLC_OFF", "LANDSAT_ETM"
+    elif sensor == 'landsat7off':
+        import_from_landsat_catalog("LANDSAT_ETM_SLC_OFF", start_date)  # "LANDSAT_8", "LANDSAT_ETM_SLC_OFF", "LANDSAT_ETM"
 
 if __name__ == '__main__':
     cli()

@@ -4,9 +4,12 @@ import boto3
 import botocore
 import os
 import requests
+import datetime
 from api.eoss_api import Api
 from harvest.sns_harvester import extract_s3_structure, parse_l1_metadata_file, \
     get_message_type, generate_s2_tile_information
+from manage.landsat_catalog import USGSCatalog
+from manage.sentinelcatalog import SentinelCatalog
 from utilities import chunks
 import general.catalog_logger
 import logging
@@ -124,4 +127,10 @@ def list_queues():
         queue = sqs.get_queue_by_name(QueueName=q)
         print ' * %s (%d) at %s' % (q, int(queue.attributes.get('ApproximateNumberOfMessages')), queue.url)
 
+
+
+
+
+if __name__ == '__main__':
+    cli()
 

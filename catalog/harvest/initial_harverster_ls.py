@@ -3,7 +3,7 @@
 # Created by sgebhardt at 30.08.16
 # Copyright EOSS GmbH 2016
 from api.eoss_api import Api
-from manage.landsat_catalog import USGS_HTTP_SERVICE
+from manage.landsat_catalog import USGS_HTTP_SERVICE, USGSCatalog
 from model.plain_models import USGSOrderContainer, GoogleLandsatContainer, S3PublicContainer, \
     Catalog_Dataset
 from datetime import datetime
@@ -158,3 +158,49 @@ def import_from_pipe(lines):
             print e
     print 'registered:', registered
     print 'skipped:', skipped
+
+
+def import_from_landsat_catalog(sensor,start_date):
+    api = Api()
+
+    max_cloud_ratio = 1.0
+    ag_season_start = datetime.strptime(start_date, '%Y-%m-%d')
+    ag_season_end = datetime.datetime.now()
+    aoi_se = (180, -90)
+    aoi_nw = (-180, 90)
+    aoi_ne = (aoi_se[0], aoi_nw[1])
+    aoi_sw = (aoi_nw[0], aoi_se[1])
+    aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
+
+    datasets = None
+
+    cat = USGSCatalog()
+    # "LANDSAT_8", "LANDSAT_ETM_SLC_OFF", "LANDSAT_ETM"
+    datasets = cat.find(sensor, aoi, ag_season_start, ag_season_end, max_cloud_ratio)
+
+
+    if datasets != None:
+        ds_found = list()
+        ds_missing = list()
+        for counter, ds in enumerate(datasets):
+            catalog_ds = api.get_dataset(ds.entity_id)
+            if catalog_ds is None or len(catalog_ds) == 0:
+                ds_missing.append(ds)
+            elif len(catalog_ds) == 1:
+                ds_found.append(catalog_ds)
+            else:
+                print 'More in catalog found: %s (%d)' % (ds.entity_id, len(catalog_ds))
+            if (counter % 25) == 0:
+                print counter, len(datasets)
+        print 'already registered: ', len(ds_found), len(datasets)
+        print 'missing: ', len(ds_missing), len(datasets)
+
+        for counter, ds_obj in enumerate(ds_missing):
+            new_ds = api.create_dataset(ds_obj)
+            if not new_ds is None:
+                print new_ds
+            if (counter % 25) == 0:
+                print counter, len(ds_missing)
+    else:
+        print 'No data found in catalog for sentinel from %s to %s' % (
+        ag_season_start.strftime("%Y-%m-%d"), ag_season_end.strftime("%Y-%m-%d"))

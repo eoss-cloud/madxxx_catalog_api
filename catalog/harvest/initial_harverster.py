@@ -5,10 +5,11 @@
 import ujson
 import dateutil.parser
 import xmltodict
+import datetime
 from api.eoss_api import Api
 from harvest import count_lines
 from manage.sentinelcatalog import SENTINEL_S3_BUCKET, SENTINEL_S3_HTTP_ZIP_BASEURL, \
-    SENTINEL_S3_HTTP_BASEURL
+    SENTINEL_S3_HTTP_BASEURL, SentinelCatalog
 from model.plain_models import SentinelS3Container, Catalog_Dataset
 from utilities.web_utils import remote_file_exists, public_key_exists, public_get_filestream
 
@@ -23,7 +24,8 @@ def sentinel_harvester(in_csv, N, M=1000):
             tileinfokey = tileinfokey.rstrip("\n")
             quicklookkey = tileinfokey.replace('tileInfo.json', 'preview.jpg')
             if counter < N + M and counter >= N:
-                if public_key_exists(SENTINEL_S3_BUCKET, tileinfokey) and public_key_exists(SENTINEL_S3_BUCKET, quicklookkey):
+                if public_key_exists(SENTINEL_S3_BUCKET, tileinfokey) and public_key_exists(SENTINEL_S3_BUCKET,
+                                                                                            quicklookkey):
                     tilenfodict = ujson.loads(public_get_filestream(SENTINEL_S3_BUCKET, tileinfokey))
                     productkey = tilenfodict['productPath']
 
@@ -34,7 +36,8 @@ def sentinel_harvester(in_csv, N, M=1000):
 
                     dataset = Catalog_Dataset()
                     dataset.entity_id = tilenfodict['productName']
-                    dataset.tile_identifier = '%02d%s%s' % (tilenfodict['utmZone'], tilenfodict['latitudeBand'], tilenfodict['gridSquare'])
+                    dataset.tile_identifier = '%02d%s%s' % (
+                    tilenfodict['utmZone'], tilenfodict['latitudeBand'], tilenfodict['gridSquare'])
                     dataset.clouds = tilenfodict['cloudyPixelPercentage']
                     dataset.acq_time = dateutil.parser.parse(tilenfodict['timestamp'])
 
@@ -95,7 +98,8 @@ def sentinel_harvester_line(line):
 
             dataset = Catalog_Dataset()
             dataset.entity_id = tilenfodict['productName']
-            dataset.tile_identifier = '%02d%s%s' % (tilenfodict['utmZone'], tilenfodict['latitudeBand'], tilenfodict['gridSquare'])
+            dataset.tile_identifier = '%02d%s%s' % (
+            tilenfodict['utmZone'], tilenfodict['latitudeBand'], tilenfodict['gridSquare'])
             dataset.clouds = tilenfodict['cloudyPixelPercentage']
             dataset.acq_time = dateutil.parser.parse(tilenfodict['timestamp'])
 
@@ -154,3 +158,47 @@ def import_from_pipe(lines):
     out = api.create_dataset(datasets)
     pprint.pprint(out)
 
+
+def import_from_sentinel_catalog(sensor,start_date):
+    api = Api()
+
+    max_cloud_ratio = 1.0
+    ag_season_start = datetime.strptime(start_date, '%Y-%m-%d')
+    ag_season_end = datetime.datetime.now()
+    aoi_se = (180, -90)
+    aoi_nw = (-180, 90)
+    aoi_ne = (aoi_se[0], aoi_nw[1])
+    aoi_sw = (aoi_nw[0], aoi_se[1])
+    aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
+
+    datasets = None
+
+    cat = SentinelCatalog()
+    datasets = cat.find(sensor, aoi, ag_season_start, ag_season_end, max_cloud_ratio)
+
+
+    if datasets != None:
+        ds_found = list()
+        ds_missing = list()
+        for counter, ds in enumerate(datasets):
+            catalog_ds = api.get_dataset(ds.entity_id)
+            if catalog_ds is None or len(catalog_ds) == 0:
+                ds_missing.append(ds)
+            elif len(catalog_ds) == 1:
+                ds_found.append(catalog_ds)
+            else:
+                print 'More in catalog found: %s (%d)' % (ds.entity_id, len(catalog_ds))
+            if (counter % 25) == 0:
+                print counter, len(datasets)
+        print 'already registered: ', len(ds_found), len(datasets)
+        print 'missing: ', len(ds_missing), len(datasets)
+
+        for counter, ds_obj in enumerate(ds_missing):
+            new_ds = api.create_dataset(ds_obj)
+            if not new_ds is None:
+                print new_ds
+            if (counter % 25) == 0:
+                print counter, len(ds_missing)
+    else:
+        print 'No data found in catalog for %s from %s to %s' % (
+        sensor, ag_season_start.strftime("%Y-%m-%d"), ag_season_end.strftime("%Y-%m-%d"))
