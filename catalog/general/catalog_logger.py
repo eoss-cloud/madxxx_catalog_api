@@ -27,6 +27,9 @@ logging.getLogger(__name__).addHandler(NullHandler())
 # Configure default logger to do nothing
 notificator = logging.getLogger(EOSS_notificator)
 
+logging.getLogger('boto3.resources.action').setLevel(logging.WARNING)
+logging.getLogger('botocore.vendored.requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
+
 
 heartbeat_log = logging.getLogger('EOSS:heartbeat')
 tracer_log = logging.getLogger('EOSS:tracer')
