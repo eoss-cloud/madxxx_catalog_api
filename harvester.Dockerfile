@@ -1,6 +1,7 @@
 #
 #
-#
+# building: docker build -t madxxx_harvester . -f harvester.Dockerfile
+# using: docker run -it --rm -e AWS_DEFAULT_REGION=zzz -e AWS_ACCESS_KEY_ID=xxx -e AWS_SECRET_ACCESS_KEY=yyy madxxx_harvester list
 
 # Pull base image.
 FROM ubuntu:16.04
@@ -14,6 +15,7 @@ RUN apt-get update && \
   apt-get install -y python python-pip
 
 RUN pip install --upgrade pip
+RUN pip install distribute --upgrade
 
 RUN apt-get install -y \
     software-properties-common libssl-dev libffi-dev \
@@ -32,5 +34,5 @@ ENV SENTINEL_USER bla
 ENV SENTINEL_PASSWORD bla
 ENV PYTHONPATH $PYTHONPATH:/eoss_catalogue_system/catalog
 
-WORKDIR /eoss_catalogue_system/catalog/client
-ENTRYPOINT ["python", "catalog/harvest/sns_harvester.py"]
+WORKDIR /eoss_catalogue_system
+ENTRYPOINT ["python", "catalog/harvest/harvester.py"]
