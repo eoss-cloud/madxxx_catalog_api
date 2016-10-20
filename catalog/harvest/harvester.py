@@ -63,9 +63,9 @@ def pipe():
 
     import_from_pipe_s2(lines)
 
-@cli.command()
-@click.argument('sensor', nargs=1)
-@click.argument('start_date', nargs=1)
+@cli.command('catalog import')
+@click.argument('sensor', nargs=1, short_help='sensor name, e.g. sentinel2, landsat7, landsat7off, landsat8')
+@click.argument('start_date', nargs=1, short_help='start date of search, it will search for one day')
 def synchronize_catalog(sensor,start_date):
     if sensor == 'sentinel2':
         import_from_sentinel_catalog(sensor,start_date)
