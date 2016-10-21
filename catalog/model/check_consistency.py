@@ -31,9 +31,10 @@ def cli(*args, **kwargs):
 
 @click.option('--api_endpoint', nargs=1, default='http://api.eoss.cloud')
 @click.argument('sensor', nargs=1)
-@click.argument('year', nargs=1, type=click.INT)
+@click.argument('start_date', nargs=1, type=click.STRING)
+@click.argument('days', nargs=1, type=click.INT)
 @cli.command('check_consistency', short_help='update catalog with exported sentinel2 metadata file')
-def main(sensor, year, api_endpoint):
+def main(sensor, start_date, days, api_endpoint):
     api = Api(api_endpoint)
 
     aoi_nw = (-180, 90)
@@ -44,8 +45,8 @@ def main(sensor, year, api_endpoint):
 
     for delta_day in range(0, 365):
         start_time = time.time()
-        start_date = parse('%d-01-01'% year) + datetime.timedelta(days=delta_day)
-        end_date = start_date + datetime.timedelta(days=1)
+        start_date = parse(start_date) + datetime.timedelta(days=delta_day)
+        end_date = start_date + datetime.timedelta(days=days)
         logger.info('Checking consistencty for %s between %s and %s' % (sensor, start_date.isoformat(), end_date.isoformat()))
 
         # Object representation
