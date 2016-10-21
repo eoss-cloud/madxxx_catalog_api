@@ -47,8 +47,8 @@ def main(sensor, start_date, days, api_endpoint):
 
     for delta_day in range(1, days):
         start_time = time.time()
-        start_date_date = parse(start_date)
-        end_date_date = start_date_date + datetime.timedelta(days=delta_day)
+        start_date_date = parse(start_date)+ datetime.timedelta(days=delta_day)
+        end_date_date = start_date_date + datetime.timedelta(days=1)
         logger.info('Checking consistencty for %s between %s and %s' % (sensor, start_date_date.isoformat(), end_date_date.isoformat()))
 
         # Object representation
