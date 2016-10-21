@@ -43,10 +43,10 @@ def main(sensor, start_date, days, api_endpoint):
     aoi_sw = (aoi_nw[0], aoi_se[1])
     aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
 
-    for delta_day in range(0, 365):
+    for delta_day in range(0, days):
         start_time = time.time()
-        start_date = parse(start_date) + datetime.timedelta(days=delta_day)
-        end_date = start_date + datetime.timedelta(days=days)
+        start_date = parse(start_date)
+        end_date = start_date + datetime.timedelta(days=delta_day)
         logger.info('Checking consistencty for %s between %s and %s' % (sensor, start_date.isoformat(), end_date.isoformat()))
 
         # Object representation
