@@ -15,8 +15,7 @@ logger = logging.getLogger()
 
 def append_data(file, data):
     with open(file,  "a") as myfile:
-        for item in data:
-            myfile.write(item+'\n')
+        myfile.writelines(data)
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -43,7 +42,7 @@ def main(sensor, year, api_endpoint):
     aoi_sw = (aoi_nw[0], aoi_se[1])
     aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
 
-    for delta_day in range(293, 0, -1):
+    for delta_day in range(0, 365):
         start_time = time.time()
         start_date = parse('%d-01-01'% year) + datetime.timedelta(days=delta_day)
         end_date = start_date + datetime.timedelta(days=1)
@@ -73,6 +72,7 @@ def main(sensor, year, api_endpoint):
                 missing_urls.append('%s:%s' % (r['tile_identifier'], r['entity_id']))
                 missing_types.append('quicklook')
 
+
         logger.info('total scans: %d' %len(url_resources))
         logger.info('already missed resources: %d' %len(missing_urls))
 
@@ -92,15 +92,19 @@ def main(sensor, year, api_endpoint):
                 rs = (grequests.head(u) for u in url_parts)
                 res = grequests.map(rs)
                 for req in res:
-                    if req.status_code != requests.codes.ok:
-                        print res, req.status_code
-                        wrong_urls.append(res)
-                        missing_types.append('zip_registered')
+                    if req is not None:
+                        if req.status_code != requests.codes.ok:
+                            wrong_urls.append(res)
+                            missing_types.append('zip_registered')
+                    else:
+                        print req.url, req
 
-        #print missing_urls
         if len(wrong_urls) > 0:
-            print wrong_urls
-            append_data('/tmp/wrong_urls.txt', wrong_urls)
+            for item in wrong_urls:
+                print item
+                for req in item:
+                    if req.status_code != requests.codes.ok:
+                        append_data('/tmp/wrong_urls.txt', req.url)
         if len(missing_urls) > 0:
             append_data('/tmp/missing_urls.txt', missing_urls)
 
@@ -108,8 +112,7 @@ def main(sensor, year, api_endpoint):
             for type in ['zip_registered', 'quicklook', 'metadata', 'zip']:
                 logger.info('%d:%s' % (operator.countOf(missing_types, type), type))
 
-
-
+        logger.info('wrong resources resources: %d' % len(wrong_urls))
         logger.info('Executed in %f secs.' % (time.time()-start_time))
 
 
