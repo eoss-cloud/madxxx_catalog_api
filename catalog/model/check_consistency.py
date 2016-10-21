@@ -43,6 +43,7 @@ def main(sensor, start_date, days, api_endpoint):
     aoi_ne = (aoi_se[0], aoi_nw[1])
     aoi_sw = (aoi_nw[0], aoi_se[1])
     aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
+    wrong_urls = list()
 
     for delta_day in range(1, days):
         start_time = time.time()
@@ -56,7 +57,7 @@ def main(sensor, start_date, days, api_endpoint):
         url_resources = list()
         missing_urls = list()
         missing_types = list()
-        wrong_urls = list()
+
         for r in results:
             if r['resources']['s3public']['zip'] !=  None:
                 url_resources.append(r['resources']['s3public']['zip'])
@@ -116,7 +117,7 @@ def main(sensor, start_date, days, api_endpoint):
 
         logger.info('wrong resources resources: %d' % len(wrong_urls))
         logger.info('Executed in %f secs.' % (time.time()-start_time))
-
+    print wrong_urls
 
 if __name__ == '__main__':
     cli()
