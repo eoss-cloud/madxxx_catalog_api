@@ -36,6 +36,7 @@ def cli(*args, **kwargs):
 @cli.command('check_consistency', short_help='update catalog with exported sentinel2 metadata file')
 def main(sensor, start_date, days, api_endpoint):
     api = Api(api_endpoint)
+    logger.info('Checking consistencty for %s between %s + %s' % (sensor, start_date, days))
 
     aoi_nw = (-180, 90)
     aoi_se = (180, -90)
@@ -43,14 +44,14 @@ def main(sensor, start_date, days, api_endpoint):
     aoi_sw = (aoi_nw[0], aoi_se[1])
     aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
 
-    for delta_day in range(0, days):
+    for delta_day in range(1, days):
         start_time = time.time()
-        start_date = parse(start_date)
-        end_date = start_date + datetime.timedelta(days=delta_day)
-        logger.info('Checking consistencty for %s between %s and %s' % (sensor, start_date.isoformat(), end_date.isoformat()))
+        start_date_date = parse(start_date)
+        end_date_date = start_date_date + datetime.timedelta(days=delta_day)
+        logger.info('Checking consistencty for %s between %s and %s' % (sensor, start_date_date.isoformat(), end_date_date.isoformat()))
 
         # Object representation
-        results = api.search_dataset(aoi, 100, start_date, end_date, sensor, full_objects=False)
+        results = api.search_dataset(aoi, 100, start_date_date, end_date_date, sensor, full_objects=False)
 
         url_resources = list()
         missing_urls = list()
