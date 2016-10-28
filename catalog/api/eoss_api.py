@@ -48,7 +48,11 @@ class ApiOverHttp(object):
             'Content-Type': 'application/json',
             'Serialization': 'General_Structure'
         }
-        r = requests.head(url, headers=self.headers)
+        try:
+            r = requests.head(url, headers=self.headers)
+        except requests.exceptions.ConnectionError, e:
+            logger.error('Cannot connect to API endpoint %s' % url)
+            raise
         if r.status_code == requests.codes.ok:
             if r.headers.get('api-version') != API_VERSION:
                 raise ApiException('Different API version %s - needs %s' % (r.headers.get('api-version'), API_VERSION))
@@ -250,8 +254,12 @@ class Api(ApiOverHttp):
             logger.exception('An error occurred during dataset search [%s]' % str(params))
 
         id_list = set()
-        for obj in response['found_dataset']:
-            id_list.add(obj['entity_id'])
+        try:
+            for obj in response['found_dataset']:
+                id_list.add(obj['entity_id'])
+        except TypeError, e:
+            logger.error(e)
+            print response
         if full_objects:
             for id in id_list:
                 results.append(reduce(operator.concat, self.get_dataset(id)))

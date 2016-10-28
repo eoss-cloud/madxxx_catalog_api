@@ -3,6 +3,7 @@
 """ EOSS catalog system
  functionality for the catalog endpoint
 """
+from utilities.web_utils import remote_file_exists
 
 __author__ = "Thilo Wehrmann, Steffen Gebhardt"
 __copyright__ = "Copyright 2016, EOSS GmbH"
@@ -175,7 +176,7 @@ class CatalogApi(Catalog):
         self.router = my_router
 
 
-    def on_get(self, req, resp, format):
+    def on_get(self, req, resp, format, check_resources=True):
         """Handles GET requests
         http://localhost:8000/catalog/search/result.json?from_date=2016-05-01&to_date=2016-06-02&sensor=sentinel2&ref_group=9&ref_id=73&clouds=50
         """
@@ -234,6 +235,12 @@ class CatalogApi(Catalog):
                              [{"start_date": dates[0], "end_date": dates[1]}],
                              sensor_list, clouds)
         found_dataset = self._get_datasets(query)
+        if check_resources:
+            for ds in found_dataset:
+                if 's3public' in ds['resources'].keys():
+                    if 'zip' in ds['resources']['s3public'].keys():
+                        if not remote_file_exists( ds['resources']['s3public']['zip']):
+                            print '%s missing' % ds['resources']['s3public']['zip']
 
         if format.lower() == 'json':
             if 'search/count' in req.url:
