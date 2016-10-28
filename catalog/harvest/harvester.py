@@ -83,7 +83,7 @@ def pipe():
 @cli.command('catalog_import', short_help='update catalog with provider catalog queries')
 @click.argument('sensor', nargs=1)
 @click.argument('start_date', nargs=1)
-@click.option('--api_endpoint', nargs=1, required=False,  default='http://api.eoss.cloud')
+@click.argument('api_endpoint', nargs=1, required=False,  default='http://api.eoss.cloud')
 def synchronize_catalog(sensor, start_date, api_endpoint):
     if sensor == 'sentinel2':
         import_from_sentinel_catalog(sensor,start_date, api_endpoint)
