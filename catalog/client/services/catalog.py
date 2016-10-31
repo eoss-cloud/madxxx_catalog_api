@@ -176,7 +176,7 @@ class CatalogApi(Catalog):
         self.router = my_router
 
 
-    def on_get(self, req, resp, format, check_resources=True):
+    def on_get(self, req, resp, format, check_resources=False):
         """Handles GET requests
         http://localhost:8000/catalog/search/result.json?from_date=2016-05-01&to_date=2016-06-02&sensor=sentinel2&ref_group=9&ref_id=73&clouds=50
         """
