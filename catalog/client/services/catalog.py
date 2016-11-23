@@ -470,7 +470,7 @@ class CatalogApi(Catalog):
                             'dates': struct['daterange'],
                             'sensors': sensor_list, 'clouds': struct['clouds']
                             }
-            logger.info('[POST] /catalog/search/result.%s [%s]' % format, extra=query_struct)
+            logger.info('[POST] /catalog/search/result.%s' % format, extra=query_struct)
 
         except KeyError, e:
             description = 'Search key: %s missing in query.' % e
