@@ -238,8 +238,9 @@ class CatalogApi(Catalog):
                         'dates':[{"start_date": dates[0], "end_date": dates[1]}],
                         'sensors':sensor_list, 'clouds':clouds
                        }
-        logger.info('[GET] /catalog/search/result.%s' % format, extra=query_struct)
+
         found_dataset = self._get_datasets(query)
+        logger.info('[GET] /catalog/search/result.%s' % format, extra=query_struct)
         if check_resources:
             for ds in found_dataset:
                 if 's3public' in ds['resources'].keys():
