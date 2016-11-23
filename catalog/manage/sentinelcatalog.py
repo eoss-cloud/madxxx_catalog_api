@@ -37,7 +37,7 @@ class SentinelCatalog(ICatalog):
     """
 
     sensors = ['sentinel1', 'sentinel2']
-    url = 'https://scihub.copernicus.eu/apihub/search?format=%s&rows=%d' % ('json', 15000)
+    url = 'https://scihub.copernicus.eu/apihub/search?format=%s&rows=%d' % ('json', 100)
 
     def __init__(self):
         self.user = read_OS_var('SENTINEL_USER', mandatory=True)
@@ -64,6 +64,7 @@ class SentinelCatalog(ICatalog):
                                                           (response.status_code, self.url, response.text)
         products = response.json()['feed']['entry']
         datasets = set()
+        print products
 
         for p in products:
             ds = Catalog_Dataset()

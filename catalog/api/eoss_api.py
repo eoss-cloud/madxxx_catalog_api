@@ -14,7 +14,6 @@ __maintainer__ = "Thilo Wehrmann"
 __email__ = "twehrmann@eoss.cloud"
 __status__ = "Production"
 
-import logging
 import operator
 import ujson
 import urlparse
@@ -28,9 +27,8 @@ from api import deserialize, serialize, load_json
 from general.catalog_exception import ApiException
 from general.catalog_logger import notificator
 from utilities import with_metaclass, Singleton, read_OS_var
+from api_logging import logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARN)
 
 API_VERSION = 'v1'
 
@@ -189,9 +187,10 @@ class Api(ApiOverHttp):
         :param entity_id: string
         :return: list of datasets
         """
+        logger.info('Accesing dataset %s' % entity_id)
         try:
             obj_json = self.__get_resource__("/dataset/{0}.json".format(entity_id))
-            notificator.info('Accesing dataset %s' % entity_id)
+
             return deserialize(obj_json, False)
         except ApiException, e:
             logger.exception('An error occurred during dataset request %s' % entity_id)
@@ -206,7 +205,7 @@ class Api(ApiOverHttp):
         try:
             req = self.__put_resource__("/dataset/{0}.json".format(ds_obj.entity_id), obj)
             if req != None:
-                notificator.info('Creating dataset %s' % ds_obj.entity_id)
+                logger.info('Creating dataset %s' % ds_obj.entity_id)
             return load_json(req)
         except ApiException, e:
             logger.exception('An error occurred during dataset creation [%s]' % str(ds_obj))
@@ -222,6 +221,7 @@ class Api(ApiOverHttp):
         for id in entity_id:
             try:
                 req = self.__del_resource__("/dataset/{0}.json".format(entity_id))
+                logger.info('Deleting dataset %s' % entity_id)
             except ApiException, e:
                 logger.exception('An error occurred during deletion of dataset [%s]' % entity_id)
         return req
@@ -250,6 +250,7 @@ class Api(ApiOverHttp):
         results = list()
         try:
             response = self.__post_resource__("catalog/search/result.json", params)
+            logger.info('Searching datasets', extra=params)
         except ApiException, e:
             logger.exception('An error occurred during dataset search [%s]' % str(params))
 

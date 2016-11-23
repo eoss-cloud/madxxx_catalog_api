@@ -5,17 +5,6 @@
  start: gunicorn --config gunicorn_config.py web_client:app
 """
 
-__author__ = "Thilo Wehrmann, Steffen Gebhardt"
-__copyright__ = "Copyright 2016, EOSS GmbH"
-__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
-__license__ = "GPL"
-__version__ = "1.0.0"
-__maintainer__ = "Thilo Wehrmann"
-__email__ = "twehrmann@eoss.cloud"
-__status__ = "Production"
-
-import logging
-
 import falcon
 
 from client import ReverseRouter, cors, RequireJSON
@@ -25,11 +14,21 @@ from client.services.dataset import Dataset
 from client.services.references import ReferenceSearcher, Reference
 from client.services.root_service import RootResource
 from client.services.sensors import Sensors
+from api_logging import logger
 
-logger = logging.getLogger(__name__)
+
+__author__ = "Thilo Wehrmann, Steffen Gebhardt"
+__copyright__ = "Copyright 2016, EOSS GmbH"
+__credits__ = ["Thilo Wehrmann", "Steffen Gebhardt"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Thilo Wehrmann"
+__email__ = "twehrmann@eoss.cloud"
+__status__ = "Production"
+
 
 # main app
-
+logger.info('Starting EOSS data catalog API')
 my_router = ReverseRouter()
 app = falcon.API(middleware=[cors.middleware, RequireJSON()], router=my_router)
 

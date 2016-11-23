@@ -21,6 +21,7 @@ from api import max_body
 from client.services.db_calls import Persistance
 from client.services.static_maps import j2_env
 from client.services.tools import can_zip_response, compress_body, make_GeoJson
+from api_logging import logger
 
 
 class CatalogStatus(object):
@@ -33,6 +34,7 @@ class CatalogStatus(object):
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
     def on_get(self, req, resp, sensor):
+        logger.info('[GET] /catalog/status/count/%s' % (sensor))
         results = dict()
 
         minx,maxx, miny, maxy = -180,180,-90,90

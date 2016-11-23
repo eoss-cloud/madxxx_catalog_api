@@ -20,11 +20,10 @@ import falcon
 
 from api import General_Structure
 from client.services.root_service import struct
-from model.orm import Context
+from api_logging import logger
 from .db_calls import Persistance
 from .tools import can_zip_response, compress_body
 
-logger = logging.getLogger(__name__)
 
 
 class Sensors:
@@ -40,11 +39,15 @@ class Sensors:
         http://localhost:8000/sensors
         http://localhost:8000/sensors/platform (sensor_level, mission, platform)
         """
+        if group:
+            logger.info('[GET] /sensors/%s' % group)
+        else:
+            logger.info('[GET] /sensors/')
         for key, value in self.headers.iteritems():
             resp.set_header(key, value)
 
         # set default group to sensor_level
-        if group is None:
+        if not group:
             group = 'sensor_level'
         results = list()
 

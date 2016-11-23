@@ -65,6 +65,7 @@ def update_catalog(queue_name, api_endpoint):
             time_interval = 2
         logger.info('Getting messages from SQS: %s (%d sec. interval)' % (queue_name, time_interval))
 
+        messages_to_delete = list()
         for message_obj in queue.receive_messages(MaxNumberOfMessages=MAX_MESSAGES, WaitTimeSeconds=10, VisibilityTimeout=60,):
             messages_to_delete = list()
             notification = ujson.loads(message_obj.body)

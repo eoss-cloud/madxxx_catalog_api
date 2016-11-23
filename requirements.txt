@@ -39,3 +39,8 @@ click
 boto3
 grequests
 decorator
+
+#logging
+python-logstash
+Pyyaml
+ruamel.yaml

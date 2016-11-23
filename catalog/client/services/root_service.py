@@ -17,6 +17,7 @@ import ujson
 import falcon
 
 from .tools import can_zip_response, compress_body, get_base_url
+from api_logging import logger
 
 struct = {
     'version': 'v1',
@@ -55,7 +56,9 @@ class RootResource(object):
         return resp
 
     def on_get(self, req, resp):
+        logger.info('[GET] /')
         resp = self.default_response(req, resp)
 
     def on_head(self, req, resp):
+        logger.info('[HEAD] /')
         resp = self.default_response(req, resp)

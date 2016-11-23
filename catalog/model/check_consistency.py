@@ -117,7 +117,7 @@ def main(sensor, start_date, days, api_endpoint):
 
         logger.info('wrong resources resources: %d' % len(wrong_urls))
         logger.info('Executed in %f secs.' % (time.time()-start_time))
-    print wrong_urls
+    print 'Wrong URLs:', wrong_urls
 
 if __name__ == '__main__':
     cli()

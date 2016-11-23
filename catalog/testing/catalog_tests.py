@@ -13,6 +13,7 @@ from pytz import UTC
 class UsgsCatalogTest(unittest.TestCase):
     """Tests USGS catalog access"""
 
+    @unittest.skip('')
     def testCatalog(self):
         """
         Create simple config object from string
@@ -31,11 +32,13 @@ class UsgsCatalogTest(unittest.TestCase):
         self.assertTrue(len(cat.find(sensor, aoi, ag_season_start, ag_season_end, cloud_ratio)) == 3)
 
 
+
 class SentinelCatalogTest(unittest.TestCase):
     """
     Test copernicus service for sentinel images
     """
 
+    @unittest.skip('')
     def testCatalog(self):
         provider = 'sentinel2'  # sentinel1, sentinel2
         max_cloud_ratio = 0.4
@@ -66,10 +69,14 @@ class CompareCatalogTest(unittest.TestCase):
 
         cat = SentinelCatalog()
         datasets = cat.find('sentinel2', aoi, ag_season_start, ag_season_end)
+        for ds in datasets:
+            print 'COPERNICUS', ds.entity_id, ds.tile_identifier
         self.assertTrue(len(datasets) == 7)
 
         cat = EOSSCatalog()
         datasets = cat.find('Sentinel2', aoi, ag_season_start, ag_season_end, 1)
+        for ds in datasets:
+            print 'EOSS', ds.entity_id, ds.tile_identifier
         self.assertTrue(len(datasets) == 7)
 
         cat = UrthecastCatalog()
@@ -80,6 +87,7 @@ class CompareCatalogTest(unittest.TestCase):
         datasets = cat.find('LANDSAT8', aoi, ag_season_start, ag_season_end, 1)
         self.assertTrue(len(datasets) == 11)
 
+    @unittest.skip('')
     def testComparitionDynamic(self):
         import random
         LS_YEARS = [2014, 2015, 2016]

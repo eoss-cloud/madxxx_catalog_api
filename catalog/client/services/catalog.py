@@ -40,7 +40,7 @@ from api import General_Structure
 from .db_calls import Persistance
 from . import getKeysFromDict
 from .tools import get_base_url, can_zip_response, compress_body, serialize, make_GeoJson
-
+from api_logging import logger
 
 class Catalog(object):
     """
@@ -234,6 +234,11 @@ class CatalogApi(Catalog):
         query = self._query_([{"ref_group": ref_group, "ref_id": ref_id}],
                              [{"start_date": dates[0], "end_date": dates[1]}],
                              sensor_list, clouds)
+        query_struct = {'area':[{"ref_group": ref_group, "ref_id": ref_id}],
+                        'dates':[{"start_date": dates[0], "end_date": dates[1]}],
+                        'sensors':sensor_list, 'clouds':clouds
+                       }
+        logger.info('[GET] /catalog/search/result.%s [%s]' % format, extra=query_struct)
         found_dataset = self._get_datasets(query)
         if check_resources:
             for ds in found_dataset:
@@ -461,6 +466,11 @@ class CatalogApi(Catalog):
                                                 href='http://docs.example.com/auth')
 
             query = self._query_(struct['areas'], struct['daterange'], sensor_list, struct['clouds'])
+            query_struct = {'area': struct['areas'],
+                            'dates': struct['daterange'],
+                            'sensors': sensor_list, 'clouds': struct['clouds']
+                            }
+            logger.info('[POST] /catalog/search/result.%s [%s]' % format, extra=query_struct)
 
         except KeyError, e:
             description = 'Search key: %s missing in query.' % e

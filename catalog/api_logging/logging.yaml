@@ -1,0 +1,36 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+    simple:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+handlers:
+    stream_handler:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: simple
+        stream: ext://sys.stdout
+    logstash_handler:
+        class: logstash.TCPLogstashHandler
+        level: INFO
+        host: kibana.eoss.cloud
+        port: 5000
+        version: 1
+        message_type: 'logstash'
+        fqdn: True
+        tags: ['EOSS-production', 'EOSS-api']
+
+
+loggers:
+    root:
+        level: INFO
+        handlers: [stream_handler]
+        propagate: no
+    eoss:catalog:
+        level: DEBUG
+        handlers: [stream_handler, logstash_handler]
+        propagate: no
+
+root:
+    level: INFO
+    handlers: [stream_handler]

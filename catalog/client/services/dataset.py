@@ -26,8 +26,8 @@ from client.services.tools import can_zip_response, compress_body
 from model import Context
 from model.orm import Catalog_Dataset
 from .db_calls import Persistance
+from api_logging import logger
 
-logger = logging.getLogger(__name__)
 
 class Dataset:
     def __init__(self):
@@ -39,6 +39,7 @@ class Dataset:
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
     def on_delete(self, req, resp, entity_id):
+        logger.info('[DEL] /dataset/%s.json' % (entity_id))
         results = Persistance().delete_dataset(entity_id)
         resp.status = falcon.HTTP_200
         resp.set_header('Content-Type', 'application/json')
@@ -74,6 +75,7 @@ class Dataset:
         http://localhost:8000/dataset/LC81920272016240LGN00.json
 
         """
+        logger.info('[GET] /dataset/%s.json' % (entity_id))
         for key, value in self.headers.iteritems():
             resp.set_header(key, value)
 
@@ -100,6 +102,7 @@ class Dataset:
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
     def on_put(self, req, resp, entity_id):
+        logger.info('[PUT] /dataset/%s.json' % (entity_id))
         for key, value in self.headers.iteritems():
             resp.set_header(key, value)
 
@@ -118,6 +121,7 @@ class Dataset:
             try:
                 new_dataset = Persistance().add_dataset(obj)
                 if new_dataset:
+                    logger.info('Register new dataset: %s' % (obj.entity_id))
                     resp.body = ujson.dumps({'status': 'OK', "new_obj_id": obj.entity_id})
                     resp.status = falcon.HTTP_201
                 else:

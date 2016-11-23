@@ -26,7 +26,7 @@ class EOSSCatalog(ICatalog):
     EOSS Catalog interface
     """
     def __init__(self):
-        self.url = 'http://localhost:8000/catalog/search/result.json'
+        self.url = 'http://api.eoss.cloud/catalog/search/result.json'
         self.headers = {'content-type': 'application/json'}
 
     def find(self, platform, aoi, date_start, date_stop, cloud_ratio=1.0):

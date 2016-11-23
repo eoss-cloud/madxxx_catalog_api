@@ -23,6 +23,7 @@ from fuzzywuzzy import fuzz
 from shapely.geometry import Polygon
 
 from client.services.static_maps import j2_env
+from api_logging import logger
 from .db_calls import Persistance
 from .tools import make_GeoJson, get_base_url, can_zip_response, compress_body
 
@@ -57,6 +58,7 @@ class Reference():
 
     def on_get(self, req, resp, group_id, reference_id, format):
         """Handles GET requests"""
+        logger.info('[GET] /reference/%s/%s.%s' % (group_id, reference_id, format))
 
         start_time = time.time()
         results = dict()
@@ -175,6 +177,7 @@ class ReferenceSearcher():
                                         href='http://docs.example.com/auth')
 
         entity_name = req.params['entity_name']
+        logger.info('[GET] /reference/search/count?entity_name+%s' % (entity_name))
         entity_name_length = len(entity_name)
         counter = 0
         similarities = list()

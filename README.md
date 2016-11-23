@@ -18,3 +18,10 @@ starting web client and api in single gunicorn session for dev only
 
 ## Docker installation
 ``` docker run -it -v /tmp/gunicorn:/tmp/gunicorn -e EOSS_CATALOG_DB=SQLALCHEMY_DB_STRING madxxx_catalog ```
+
+## Data harvesting
+- Build harvester docker with `sudo docker build -t madxxx_harvester -f harvester.Dockerfile .`
+- Check available queues (use your credentials):
+ 
+  ```docker run -it --rm -e AWS_DEFAULT_REGION=xxx -e AWS_ACCESS_KEY_ID=xxx -e AWS_SECRET_ACCESS_KEY=xxx madxxx_harvester queue_list```
+ - Start message polling with:
