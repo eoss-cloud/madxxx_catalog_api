@@ -56,9 +56,9 @@ class RootResource(object):
         return resp
 
     def on_get(self, req, resp):
-        logger.info('[GET] /')
+        #logger.info('[GET] /')
         resp = self.default_response(req, resp)
 
     def on_head(self, req, resp):
-        logger.info('[HEAD] /')
+        #logger.info('[HEAD] /')
         resp = self.default_response(req, resp)

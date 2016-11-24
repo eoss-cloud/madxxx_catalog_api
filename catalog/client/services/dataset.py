@@ -102,7 +102,7 @@ class Dataset:
 
     @falcon.before(max_body(64 * 1024))  # max 64kB request size
     def on_put(self, req, resp, entity_id):
-        logger.info('[PUT] /dataset/%s.json' % (entity_id))
+        #logger.info('[PUT] /dataset/%s.json' % (entity_id))
         for key, value in self.headers.iteritems():
             resp.set_header(key, value)
 
