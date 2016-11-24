@@ -42,6 +42,13 @@ from . import getKeysFromDict
 from .tools import get_base_url, can_zip_response, compress_body, serialize, make_GeoJson
 from api_logging import logger
 
+def date_handler(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    else:
+        raise TypeError
+
+
 class Catalog(object):
     """
        EOSS catalog class from web API
@@ -240,7 +247,7 @@ class CatalogApi(Catalog):
                        }
 
         found_dataset = self._get_datasets(query)
-        logger.info('[GET] /catalog/search/result.%s' % format, extra=query_struct)
+        logger.info('[GET] /catalog/search/result.%s' % format, extra={x:str(y) for x,y in query_struct.iteritems()})
         if check_resources:
             for ds in found_dataset:
                 if 's3public' in ds['resources'].keys():
@@ -471,7 +478,7 @@ class CatalogApi(Catalog):
                             'dates': struct['daterange'],
                             'sensors': sensor_list, 'clouds': struct['clouds']
                             }
-            logger.info('[POST] /catalog/search/result.%s' % format, extra=query_struct)
+            logger.info('[POST] /catalog/search/result.%s' % format, extra={x:str(y) for x,y in query_struct.iteritems()})
 
         except KeyError, e:
             description = 'Search key: %s missing in query.' % e
