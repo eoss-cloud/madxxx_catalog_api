@@ -174,3 +174,5 @@ class Persistance:
                 or_(*dates_filter)).filter(Catalog_Dataset.tile_identifier.in_(tiles_list)).order_by(Catalog_Dataset.tile_identifier,
                                                                                                      Catalog_Dataset.acq_time)
         return query
+
+

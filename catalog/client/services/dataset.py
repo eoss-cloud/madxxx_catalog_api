@@ -131,6 +131,6 @@ class Dataset:
                                               href='http://docs.example.com/auth')
             except TimeoutError, e:
                 resp.body = ujson.dumps({'status': 'ERROR', "errorcode": str(e)})
-                resp.status = falcon.HTTP_500
+                resp.status = falcon.HTTP_408
 
 
