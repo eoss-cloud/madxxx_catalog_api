@@ -480,6 +480,7 @@ class CatalogApi(Catalog):
                             }
             logger.info('[POST] /catalog/search/result.%s' % format, extra={x:str(y) for x,y in query_struct.iteritems()})
 
+
         except KeyError, e:
             description = 'Search key: %s missing in query.' % e
             raise falcon.HTTPBadRequest('KeyError', description,
