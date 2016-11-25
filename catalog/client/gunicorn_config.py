@@ -5,9 +5,9 @@ __copyright__ = "Copyright 2016, EOSS GmbH"
 
 
 # direct client communication
-#bind = "0.0.0.0:8000"
+bind = "0.0.0.0:8000"
 # socket communication for nginx
-bind = "unix:/tmp/gunicorn/gunicorn.sock"
+#bind = "unix:/tmp/gunicorn/gunicorn.sock"
 chdir = "/"
 loglevel = "DEBUG"
 workers = "4"
