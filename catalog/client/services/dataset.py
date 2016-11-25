@@ -121,17 +121,17 @@ class Dataset:
             try:
                 new_dataset = Persistance().add_dataset(obj)
                 if new_dataset:
-                    logger_container = dict()
-                    logger_container['sensor'] = obj.sensor
-                    logger_container['id'] = obj.id
-                    logger_container['entity_id'] = obj.entity_id
-                    logger_container['acq_time'] = obj.acq_time
-                    logger_container['tile_identifier'] = obj.tile_identifier
-                    logger_container['time_registered'] = obj.time_registered
+                    #logger_container = dict()
+                    #logger_container['sensor'] = obj.sensor
+                    #logger_container['id'] = obj.id
+                    #logger_container['entity_id'] = obj.entity_id
+                    #logger_container['acq_time'] = obj.acq_time
+                    #logger_container['tile_identifier'] = obj.tile_identifier
+                    #logger_container['time_registered'] = obj.time_registered
 
 
-                    # logger.info('Register new dataset: %s' % (obj.entity_id))
-                    logger.info('Register new dataset: %s' % (obj.entity_id), logger_container)
+                    logger.info('Register new dataset: %s' % (obj.entity_id))
+                    #logger.info('Register new dataset: %s' % (obj.entity_id), logger_container)
 
                     resp.body = ujson.dumps({'status': 'OK', "new_obj_id": obj.entity_id})
                     resp.status = falcon.HTTP_201
