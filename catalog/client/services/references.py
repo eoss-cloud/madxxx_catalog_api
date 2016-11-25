@@ -57,7 +57,9 @@ class Reference():
             self.ref_groups[obj.id] = obj
 
     def on_get(self, req, resp, group_id, reference_id, format):
-        """Handles GET requests"""
+        """Handles GET requests
+
+        """
         logger.info('[GET] /reference/%s/%s.%s' % (group_id, reference_id, format))
 
         start_time = time.time()
@@ -70,7 +72,13 @@ class Reference():
 
             ref_objects = Persistance().get_reference_by_groupid_polygon(group_id, polygon.wkt)
         elif reference_id != 'all':
-            ref_objects = Persistance().get_reference_by_groupid_reference_id(group_id, reference_id)
+            if 'access_type' in req.params:
+                if 'name' == req.params['access_type'].lower():
+                    ref_objects = Persistance().get_reference_by_groupid_reference_name(group_id, reference_id)
+                else:
+                    ref_objects = Persistance().get_reference_by_groupid_reference_id(group_id, reference_id)
+            else:
+                ref_objects = Persistance().get_reference_by_groupid_reference_id(group_id, reference_id)
         else:
             description = 'Please specify entity_name OR bbox with request, given %s:%s.' % (reference_id, req.params.get('bbox'))
             raise falcon.HTTPBadRequest('DateFormat', description,

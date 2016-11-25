@@ -159,6 +159,13 @@ class Persistance:
             Spatial_Reference.referencetype_id == group_id).filter(
             Spatial_Reference.ref_id == reference_id)
 
+    def get_reference_by_groupid_reference_name(self, group_id, reference_name):
+        return self.session.query(Spatial_Reference, geoalchemy2.functions.ST_AsGeoJSON(Spatial_Reference.geom),
+                                  geoalchemy2.functions.ST_AsGeoJSON(geoalchemy2.functions.ST_Envelope(Spatial_Reference.geom))
+                                  ).filter(
+            Spatial_Reference.referencetype_id == group_id).filter(
+            Spatial_Reference.ref_name == reference_name)
+
     @region.cache_on_arguments()
     def get_selected_references(self, REGISTERED_REF_TYPES):
         return self.session.query(Spatial_Reference.ref_name, Spatial_Reference.referencetype_id, Spatial_Reference.ref_id).filter(
