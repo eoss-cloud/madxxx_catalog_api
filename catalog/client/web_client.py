@@ -6,6 +6,8 @@
 """
 
 import falcon
+import ruamel
+import warnings
 
 from client import ReverseRouter, cors, RequireJSON
 from client.services.catalog import CatalogApi
@@ -26,6 +28,8 @@ __maintainer__ = "Thilo Wehrmann"
 __email__ = "twehrmann@eoss.cloud"
 __status__ = "Production"
 
+                                                                                                                                                               │
+warnings.simplefilter('ignore', ruamel.yaml.error.UnsafeLoaderWarning)
 
 # main app
 logger.info('Starting EOSS data catalog API')
