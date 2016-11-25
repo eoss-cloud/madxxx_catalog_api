@@ -28,7 +28,6 @@ __maintainer__ = "Thilo Wehrmann"
 __email__ = "twehrmann@eoss.cloud"
 __status__ = "Production"
 
-                                                                                                                                                               │
 warnings.simplefilter('ignore', ruamel.yaml.error.UnsafeLoaderWarning)
 
 # main app
