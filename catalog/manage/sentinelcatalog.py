@@ -104,3 +104,22 @@ class SentinelCatalog(ICatalog):
 
     def register(self, ds):
         raise Exception('Cannot register dataset in repository %s' % self.url)
+
+
+if __name__ == '__main__':
+    from pytz import UTC
+    from datetime import datetime, timedelta
+
+    ag_season_start = datetime(2016, 6, 2, tzinfo=UTC)
+    ag_season_end = datetime(2016, 10, 6, tzinfo=UTC)
+    aoi_nw = (-94.21561717987059, 35.26342169967158)
+    aoi_se = (-94.21304225921631, 35.265278832862336)
+
+    aoi_ne = (aoi_se[0], aoi_nw[1])
+    aoi_sw = (aoi_nw[0], aoi_se[1])
+    aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
+
+    cat = SentinelCatalog()
+    datasets = cat.find('sentinel2', aoi, ag_season_start, ag_season_end)
+
+    print datasets

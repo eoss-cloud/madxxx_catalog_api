@@ -35,7 +35,8 @@ USGS_HTTP_SERVICE = "http://earthexplorer.usgs.gov/EE/InventoryStream/pathrow?" 
                     + "start_path=%d&end_path=%d&start_row=%d&end_row=%d&sensor=%s&" \
                     + "start_date=%s&end_date=%s"
 
-SUPPORTED_SENSORS = ('LANDSAT_8', 'LANDSAT_7', 'LANDSAT_5')
+# SUPPORTED_SENSORS = ('LANDSAT_8', 'LANDSAT_7', 'LANDSAT_5')
+SUPPORTED_SENSORS = ("LANDSAT_8", "LANDSAT_ETM_SLC_OFF", "LANDSAT_ETM", "LANDSAT_TM")
 
 
 class USGSCatalog(ICatalog):
