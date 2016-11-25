@@ -27,7 +27,7 @@ SENTINEL_S3_HTTP_ZIP_BASEURL = 'http://sentinel-s2-l1c.s3-website.eu-central-1.a
 SENTINEL_S3_HTTP_BASEURL = 'http://sentinel-s2-l1c.s3-website.eu-central-1.amazonaws.com/'
 SENTINEL_S3_BUCKET = 'sentinel-s2-l1c'
 
-logger = logging.getLogger(__name__)
+logger=logging.getLogger('eoss:harvester')
 
 
 def make_catalog_entry(s, aws_struc):
@@ -152,7 +152,7 @@ def generate_s2_tile_information(tile_path):
 
         dataset.resources = container
         return dataset
-        logger.warn("WARNING: Metadata does not exist for %s" % (tile_path))
+
     else:
         logger.warn("No quicklook and/or tileinfo metadata file in bucket found: %s" % tile_path)
         return None

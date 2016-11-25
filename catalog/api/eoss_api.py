@@ -17,6 +17,7 @@ __status__ = "Production"
 import operator
 import ujson
 import urlparse
+import logging
 
 import grequests
 import requests
@@ -27,7 +28,9 @@ from api import deserialize, serialize, load_json
 from general.catalog_exception import ApiException
 from general.catalog_logger import notificator
 from utilities import with_metaclass, Singleton, read_OS_var
-from api_logging import logger
+
+
+logger=logging.getLogger('eoss:api')
 
 
 API_VERSION = 'v1'
@@ -90,10 +93,12 @@ class ApiOverHttp(object):
         elif req.status_code == requests.codes.unauthorized:
             raise ApiException("Cannot login to system...")
 
-    def __get_resource__(self, url):
+    def __get_resource__(self, url, **params):
         url = urlparse.urljoin(self.url, url)
-        req = requests.get(url, headers=self.headers)
+
+        req = requests.get(url, headers=self.headers, params=params)
         logger.info('[%s:%d] %s' % ('GET', req.status_code, url))
+
         if req.status_code == requests.codes.ok:
             if len(req.text) > 0:
                 return req.json()
@@ -187,7 +192,7 @@ class Api(ApiOverHttp):
         :param entity_id: string
         :return: list of datasets
         """
-        logger.info('Accesing dataset %s' % entity_id)
+        logger.info('Accessing dataset %s' % entity_id)
         try:
             obj_json = self.__get_resource__("/dataset/{0}.json".format(entity_id))
 
@@ -204,7 +209,7 @@ class Api(ApiOverHttp):
         obj = serialize(ds_obj, as_json=False)
         try:
             req = self.__put_resource__("/dataset/{0}.json".format(ds_obj.entity_id), obj)
-            if req != None:
+            if req:
                 logger.info('Creating dataset %s' % ds_obj.entity_id)
             return load_json(req)
         except ApiException, e:

@@ -48,6 +48,11 @@ def date_handler(obj):
     else:
         raise TypeError
 
+GRID_SYSTEMS = {'Sentinel - 2A': 10,
+                        'LANDSAT_ETM': 11,
+                        'LANDSAT_ETM_SLC_OFF': 11,
+                        'OLI_TIRS': 11,
+                        'TIRS': 11}
 
 class Catalog(object):
     """
@@ -61,12 +66,6 @@ class Catalog(object):
             self.aggregations[agg.aggregation_name.lower()].append(agg)
 
     def _query_(self, areas, dates, sensors, clouds):
-        GRID_SYSTEMS = {'Sentinel - 2A': 10,
-                        'LANDSAT_ETM': 11,
-                        'LANDSAT_ETM_SLC_OFF': 11,
-                        'OLI_TIRS': 11,
-                        'TIRS': 11}
-
         sensors_filter = list()
         grid_list = defaultdict(set)
 

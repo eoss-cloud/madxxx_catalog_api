@@ -87,7 +87,6 @@ class Dataset:
             if req.get_header('Serialization') != 'General_Structure':
                 # Return simple dict structure for web client
                 for obj in result_set:
-                    print obj
                     results.append(serialize(obj, as_json=False)['data'])
             else:
                 for obj in result_set:
@@ -121,20 +120,35 @@ class Dataset:
             try:
                 new_dataset = Persistance().add_dataset(obj)
                 if new_dataset:
-                    #logger_container = dict()
-                    #logger_container['sensor'] = obj.sensor
-                    #logger_container['id'] = obj.id
-                    #logger_container['entity_id'] = obj.entity_id
-                    #logger_container['acq_time'] = obj.acq_time
-                    #logger_container['tile_identifier'] = obj.tile_identifier
-                    #logger_container['time_registered'] = obj.time_registered
+                    if obj.sensor == 'Sentinel-2A':
+                        group_id = 10
+                    elif obj.sensor in ['OLI_TIRS', 'OLI', 'TIRS']:
+                        group_id = 11
+                    else:
+                        group_id = None
+                    if group_id:
+                        result = Persistance().get_reference_by_groupid_reference_name(group_id, obj.tile_identifier)
+                    ref_obj =  result.first()
+                    if ref_obj:
+                        coords = ujson.loads(ref_obj[2])['coordinates']
+                        min_coord = min([b for x in coords for b in x])
+                        max_coord = max([b for x in coords for b in x])
+                        cent_y = (max_coord[0] - min_coord[0]) / 2 + min_coord[0]
+                        cent_x = (max_coord[1] - min_coord[1]) / 2 + min_coord[1]
 
-
-                    logger.info('Register new dataset: %s' % (obj.entity_id))
-                    #logger.info('Register new dataset: %s' % (obj.entity_id), logger_container)
-
-                    resp.body = ujson.dumps({'status': 'OK', "new_obj_id": obj.entity_id})
+                        logger_container = dict()
+                        logger_container['sensor'] = obj.sensor
+                        logger_container['entity_id'] = obj.entity_id
+                        logger_container['tile_identifier'] = obj.tile_identifier
+                        logger_container['acq_time'] = obj.acq_time
+                        logger_container['clouds'] = obj.clouds
+                        logger_container['time_registered'] = str(obj.time_registered)
+                        logger_container['location'] = {'lat': cent_y, 'lon': cent_x}
+                    else:
+                        logger_container = dict()
+                    resp.body = ujson.dumps({'action':'create dataset', 'status': 'OK', "new_obj_id": obj.entity_id})
                     resp.status = falcon.HTTP_201
+                    logger.info('Register new dataset: %s' % (obj.entity_id), extra=logger_container)
                 else:
                     logger.warn('Dataset (%s/%s/%s) already exists' % (obj.entity_id, obj.tile_identifier, obj.acq_time))
                     description = 'Dataset (%s/%s/%s already exists' % (obj.entity_id, obj.tile_identifier, obj.acq_time)

@@ -3,6 +3,7 @@
 """ EOSS catalog system
  functionality for the references endpoint
 """
+import psycopg2
 
 __author__ = "Thilo Wehrmann, Steffen Gebhardt"
 __copyright__ = "Copyright 2016, EOSS GmbH"
@@ -72,19 +73,15 @@ class Reference():
 
             ref_objects = Persistance().get_reference_by_groupid_polygon(group_id, polygon.wkt)
         elif reference_id != 'all':
-            if 'access_type' in req.params:
-                if 'name' == req.params['access_type'].lower():
-                    ref_objects = Persistance().get_reference_by_groupid_reference_name(group_id, reference_id)
-                else:
-                    ref_objects = Persistance().get_reference_by_groupid_reference_id(group_id, reference_id)
-            else:
-                ref_objects = Persistance().get_reference_by_groupid_reference_id(group_id, reference_id)
+            ref_objects = Persistance().get_reference_by_groupid_reference_id(group_id, reference_id)
+
         else:
             description = 'Please specify entity_name OR bbox with request, given %s:%s.' % (reference_id, req.params.get('bbox'))
             raise falcon.HTTPBadRequest('DateFormat', description,
                                         href='http://docs.example.com/auth')
 
         results['counter'] = ref_objects.count()
+
         geoms, attrs = list(), list()
         extents = list()
         for ref_objs in ref_objects.all():

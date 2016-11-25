@@ -25,7 +25,8 @@ from sqlalchemy import text
 
 from model import Context
 from model.orm import Catalog_Dataset, SensorAggregation, Spatial_Reference, Spatial_Reference_type
-from .simple_cache import region
+#from .simple_cache import region
+from client.services.simple_cache import region
 
 
 class Persistance:
@@ -183,3 +184,18 @@ class Persistance:
         return query
 
 
+
+if __name__ == '__main__':
+    group_id, tile_identifier = 10, '32UPA'
+    result = Persistance().get_reference_by_groupid_reference_name(group_id, tile_identifier)
+    a= result.first()
+    print a
+    for x in a:
+        print x
+    cent_x, cent_y = 0.0, 0.0
+    coords = ujson.loads(a[2])['coordinates']
+    print coords
+    min_coord = min([b for x in coords for b in x])
+    max_coord = max([b for x in coords for b in x])
+    print min_coord, max_coord
+    print (max_coord[0]-min_coord[0])/2+min_coord[0], (max_coord[1]-min_coord[1])/2+min_coord[0]

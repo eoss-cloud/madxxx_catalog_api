@@ -27,7 +27,7 @@ import logging
 
 MAX_MESSAGES = 10
 
-logger=logging.getLogger(__name__)
+logger=logging.getLogger('eoss:harvester')
 
 
 def remove_messages_from_queue(queue, message_list):
@@ -81,7 +81,6 @@ def update_catalog(queue_name, api_endpoint):
 
                     try:
                         obj = parse_l1_metadata_file(req.json(), s3)
-                        print counter, len(messages_to_delete), int(queue.attributes.get('ApproximateNumberOfMessages'))
                         new_ds = api.create_dataset(obj)
                         if not new_ds is None:
                             print new_ds
@@ -103,12 +102,11 @@ def update_catalog(queue_name, api_endpoint):
                 for tile in message[u'tiles']:
                     tile_path = tile[u'path']
                     obj = generate_s2_tile_information(tile_path)
-                    if obj != None:
+                    if obj:
                         try:
-                            print counter, len(messages_to_delete), int(queue.attributes.get('ApproximateNumberOfMessages'))
                             new_ds =  api.create_dataset(obj)
-                            if not new_ds is None:
-                                print new_ds
+                            if  new_ds is not None:
+                                logger.info('Register new dataset: %s' % (obj.entity_id))
                             counter += 1
                             messages_to_delete.append({
                                 'Id': message_obj.message_id,

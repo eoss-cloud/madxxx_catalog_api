@@ -24,6 +24,7 @@ from harvest.initial_harverster_ls import import_from_file_ls, import_from_pipe_
 from harvest.initial_harverster_s2 import import_from_file_s2, import_from_pipe_s2, \
     import_from_sentinel_catalog
 from harvest.sns_connector import list_queues, update_catalog
+import api_logging
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])

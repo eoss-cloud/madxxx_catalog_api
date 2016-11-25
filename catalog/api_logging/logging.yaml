@@ -30,6 +30,15 @@ loggers:
         level: DEBUG
         handlers: [stream_handler, logstash_handler]
         propagate: no
+    eoss:harvester:
+        level: DEBUG
+        handlers: [stream_handler, logstash_handler]
+        propagate: no
+    eoss:api:
+        level: DEBUG
+        handlers: [stream_handler, logstash_handler]
+        propagate: no
+
 
 root:
     level: INFO
