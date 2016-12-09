@@ -37,9 +37,9 @@ def make_catalog_entry(s, aws_struc):
     dataset.tile_identifier = '%03d%03d' % (int(s["PRODUCT_METADATA"]["WRS_PATH"]), int(s["PRODUCT_METADATA"]["WRS_ROW"]))
     dataset.clouds = float(s["IMAGE_ATTRIBUTES"]["CLOUD_COVER"])
 
-    if int(s["PRODUCT_METADATA"]["WRS_PATH"]) > 0 and int(s["PRODUCT_METADATA"]["WRS_PATH"]) < 123:
+    if int(dataset.clouds) > 0:
         dataset.daynight = 'day'
-    elif int(s["PRODUCT_METADATA"]["WRS_PATH"]) > 122 and int(s["PRODUCT_METADATA"]["WRS_PATH"]) < 234:
+    else:
         dataset.daynight = 'night'
     date_str = '%sT%s' % (s["PRODUCT_METADATA"]["DATE_ACQUIRED"], s["PRODUCT_METADATA"]["SCENE_CENTER_TIME"])
     dataset.acq_time = dateutil.parser.parse(date_str)

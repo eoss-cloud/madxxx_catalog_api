@@ -57,9 +57,9 @@ class UrthecastCatalog(ICatalog):
             # ds.tile_identifier = r['tile_identifier']
             ds.clouds = r['cloud_coverage']
             # ds.level = r['level']
-            if int(path) > 0 and int(path) < 123:
+            if int(ds.clouds) > 0:
                 ds.daynight = 'day'
-            elif int(path) > 122 and int(path) < 234:
+            else:
                 ds.daynight = 'night'
 
             datasets.add(ds)
