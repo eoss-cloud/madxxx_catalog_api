@@ -37,7 +37,7 @@ def make_catalog_entry(s, aws_struc):
     dataset.tile_identifier = '%03d%03d' % (int(s["PRODUCT_METADATA"]["WRS_PATH"]), int(s["PRODUCT_METADATA"]["WRS_ROW"]))
     dataset.clouds = float(s["IMAGE_ATTRIBUTES"]["CLOUD_COVER"])
 
-    if int(dataset.clouds) > 0:
+    if int(dataset.clouds) >= 0:
         dataset.daynight = 'day'
     else:
         dataset.daynight = 'night'
