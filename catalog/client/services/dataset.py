@@ -178,7 +178,7 @@ class DatasetSearch:
         types = dict()
         result_set = list()
 
-        print len(results)
+
         for ds in results:
             for k, v in ds.__dict__.iteritems():
                 if '_' != k[0]:
@@ -187,6 +187,8 @@ class DatasetSearch:
             x = General_Structure(values, types)
             x.__class__.__name__ = 'Catalog_Dataset'
             result_set.append(x)
+
+        results = []
 
         if len(result_set) == 0:
             resp.status = falcon.HTTP_404

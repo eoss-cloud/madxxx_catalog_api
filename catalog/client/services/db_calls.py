@@ -191,8 +191,8 @@ class Persistance:
 
 
 
-if __name__ == '__main__':
-    group_id, tile_identifier = 10, '32UPA'
-    result = Persistance().get_dataset_by_sensor_and_date('LANDSAT_ETM', '2000-01-01')
-    print result
-    # print a
+# if __name__ == '__main__':
+#     group_id, tile_identifier = 10, '32UPA'
+#     result = Persistance().get_dataset_by_sensor_and_date('LANDSAT_ETM', '2000-01-01')
+#     print result
+#     # print a
