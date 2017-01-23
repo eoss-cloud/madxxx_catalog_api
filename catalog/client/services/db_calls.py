@@ -3,6 +3,7 @@
 """ EOSS catalog system
  database connection for the service endpoints
 """
+from sqlalchemy.sql.sqltypes import Date
 
 __author__ = "Thilo Wehrmann, Steffen Gebhardt"
 __copyright__ = "Copyright 2016, EOSS GmbH"
@@ -50,6 +51,10 @@ class Persistance:
     #@region.cache_on_arguments()
     def get_dataset(self, entity_id):
         ds = self.session.query(Catalog_Dataset).filter(Catalog_Dataset.entity_id == entity_id).all()
+        return ds
+
+    def get_dataset_by_sensor_and_date(self,sensor,acq_date):
+        ds = self.session.query(Catalog_Dataset).filter(Catalog_Dataset.sensor == sensor).filter(func.DATE(Catalog_Dataset.acq_time)==func.DATE(acq_date)).all()
         return ds
 
     def get_observation_coverage(self, reference_type_id, last_days=2):
@@ -187,15 +192,6 @@ class Persistance:
 
 if __name__ == '__main__':
     group_id, tile_identifier = 10, '32UPA'
-    result = Persistance().get_reference_by_groupid_reference_name(group_id, tile_identifier)
-    a= result.first()
-    print a
-    for x in a:
-        print x
-    cent_x, cent_y = 0.0, 0.0
-    coords = ujson.loads(a[2])['coordinates']
-    print coords
-    min_coord = min([b for x in coords for b in x])
-    max_coord = max([b for x in coords for b in x])
-    print min_coord, max_coord
-    print (max_coord[0]-min_coord[0])/2+min_coord[0], (max_coord[1]-min_coord[1])/2+min_coord[0]
+    result = Persistance().get_dataset_by_sensor_and_date('LANDSAT_ETM', '2000-01-01')
+    print result
+    # print a
