@@ -10,7 +10,7 @@ import falcon
 from client import ReverseRouter, cors, RequireJSON
 from client.services.catalog import CatalogApi
 from client.services.catalog_status import CatalogStatus
-from client.services.dataset import Dataset
+from client.services.dataset import Dataset, DatasetSearch
 from client.services.references import ReferenceSearcher, Reference
 from client.services.root_service import RootResource
 from client.services.sensors import Sensors
@@ -47,3 +47,5 @@ app.add_route('/sensors', Sensors(), name='sensors')
 app.add_route('/sensors/{group}', Sensors(), name='sensors')
 
 app.add_route('/catalog/status/count/{sensor}', CatalogStatus(), name='catalog_status')
+
+app.add_route('/dataset/search.json', DatasetSearch(), name='dataset_search')

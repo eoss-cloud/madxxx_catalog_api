@@ -159,3 +159,50 @@ class Dataset:
                 resp.status = falcon.HTTP_408
 
 
+class DatasetSearch:
+    def __init__(self):
+        self.logger = logging.getLogger('eoss.' + __name__)
+        self.default_status = falcon.HTTP_200
+        self.default_content_type = 'application/json'
+        self.headers = {'api-version': struct['version'],
+                        'Content-Type': self.default_content_type}
+
+
+    def on_get(self, req, resp):
+
+        sensor = req.params['sensor']
+        acq_date = req.params['acq_date']
+
+        results = Persistance().get_dataset_by_sensor_and_date(sensor,acq_date)
+        values = dict()
+        types = dict()
+        result_set = list()
+
+        print len(results)
+        for ds in results:
+            for k, v in ds.__dict__.iteritems():
+                if '_' != k[0]:
+                    values[k] = v
+                    types[k] = type(v)
+            x = General_Structure(values, types)
+            x.__class__.__name__ = 'Catalog_Dataset'
+            result_set.append(x)
+
+        if len(result_set) == 0:
+            resp.status = falcon.HTTP_404
+
+        else:
+            if req.get_header('Serialization') != 'General_Structure':
+                # Return simple dict structure for web client
+                for obj in result_set:
+                    results.append(serialize(obj, as_json=False)['data'])
+            else:
+                for obj in result_set:
+                    results.append(serialize(obj, as_json=False))
+            resp.status = self.default_status
+
+        if can_zip_response(req.headers):
+            resp.set_header('Content-Encoding', 'gzip')
+            resp.body = compress_body(ujson.dumps(results))
+        else:
+            resp.body = ujson.dumps(results)

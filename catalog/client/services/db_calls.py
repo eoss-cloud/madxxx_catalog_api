@@ -55,6 +55,7 @@ class Persistance:
 
     def get_dataset_by_sensor_and_date(self,sensor,acq_date):
         ds = self.session.query(Catalog_Dataset).filter(Catalog_Dataset.sensor == sensor).filter(func.DATE(Catalog_Dataset.acq_time)==func.DATE(acq_date)).all()
+        print ds
         return ds
 
     def get_observation_coverage(self, reference_type_id, last_days=2):
