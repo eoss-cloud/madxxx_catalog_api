@@ -176,9 +176,7 @@ class DatasetSearch:
 
         except KeyError, e:
             description = 'sensor, acq_date'
-            raise falcon.HTTPNotAcceptable('Request parameters missing', description,
-                                      href='http://docs.example.com/auth')
-
+            raise falcon.HTTPNotAcceptable('Request parameters missing')
         results = Persistance().get_dataset_by_sensor_and_date(sensor,acq_date)
         values = dict()
         types = dict()
