@@ -173,6 +173,7 @@ class DatasetSearch:
         try:
             sensor = req.params['sensor']
             acq_date = req.params['acq_date']
+
         except KeyError, e:
             description = 'sensor, acq_date'
             raise falcon.HTTPNotAcceptable('Request parameters missing', description,
