@@ -191,7 +191,7 @@ class DatasetSearch:
         results = []
 
         if len(result_set) == 0:
-            resp.status = falcon.HTTP_404
+            results = []
 
         else:
             if req.get_header('Serialization') != 'General_Structure':
