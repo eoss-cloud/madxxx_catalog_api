@@ -170,8 +170,13 @@ class DatasetSearch:
 
     def on_get(self, req, resp):
 
-        sensor = req.params['sensor']
-        acq_date = req.params['acq_date']
+        try:
+            sensor = req.params['sensor']
+            acq_date = req.params['acq_date']
+        except KeyError, e:
+            description = 'sensor, acq_date'
+            raise falcon.HTTPNotAcceptable('Request parameters missing', description,
+                                      href='http://docs.example.com/auth')
 
         results = Persistance().get_dataset_by_sensor_and_date(sensor,acq_date)
         values = dict()
