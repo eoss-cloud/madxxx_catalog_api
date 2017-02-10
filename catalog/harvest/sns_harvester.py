@@ -102,7 +102,7 @@ def get_message_type(message):
 
 def generate_s2_tile_information(tile_path):
     tileinfokey = os.path.join(tile_path, 'tileInfo.json')
-    quicklookkey = os.path.join(tile_path, 'preview.jpg')
+    quicklookkey = os.path.join(tile_path, 'preview.jp2')
 
     if public_key_exists(SENTINEL_S3_BUCKET, tileinfokey) and public_key_exists(SENTINEL_S3_BUCKET, quicklookkey):
         tilenfodict = ujson.loads(public_get_filestream(SENTINEL_S3_BUCKET, tileinfokey))
@@ -137,7 +137,7 @@ def generate_s2_tile_information(tile_path):
                 daynight = 'night'
             dataset.daynight = daynight
 
-        quicklookurl = SENTINEL_S3_HTTP_BASEURL + tilenfodict['path'] + '/preview.jpg'
+        quicklookurl = SENTINEL_S3_HTTP_BASEURL + tilenfodict['path'] + '/preview.jp2'
         metadataurl = SENTINEL_S3_HTTP_BASEURL + productkey + '/metadata.xml'
 
         container = dict()
