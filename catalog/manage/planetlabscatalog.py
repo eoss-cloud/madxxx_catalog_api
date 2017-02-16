@@ -22,7 +22,7 @@ import geojson
 import ujson
 import requests
 from manage import ICatalog
-from model import Dataset, PlanetContainer
+# from model import Dataset, PlanetContainer
 from geoalchemy2.elements import WKTElement
 from pytz import UTC
 from requests.auth import HTTPBasicAuth
@@ -37,34 +37,11 @@ class PlanetDataCatalog(ICatalog):
 
     def find(self, provider, aoi, date_start, date_stop, cloud_ratio=0.2):
         # filter for items the overlap with our chosen geometry
+        # ["REOrthoTile"] ["PSOrthoTile"]
 
-        geo_json_geometry = {
-            "type": "Polygon",
-            "coordinates": [
-                [
-                    [
-                        -122.52227783203125,
-                        40.660847697284815
-                    ],
-                    [
-                        -122.52227783203125,
-                        40.987154933797335
-                    ],
-                    [
-                        -122.01690673828124,
-                        40.987154933797335
-                    ],
-                    [
-                        -122.01690673828124,
-                        40.660847697284815
-                    ],
-                    [
-                        -122.52227783203125,
-                        40.660847697284815
-                    ]
-                ]
-            ]
-        }
+        poly = Polygon(aoi)
+        g2 = geojson.Feature(geometry=poly, properties={})
+        geo_json_geometry = g2.geometry
 
         geometry_filter = {
             "type": "GeometryFilter",
@@ -77,8 +54,8 @@ class PlanetDataCatalog(ICatalog):
             "type": "DateRangeFilter",
             "field_name": "acquired",
             "config": {
-                "gte": "2016-07-01T00:00:00.000Z",
-                "lte": "2016-09-01T00:00:00.000Z"
+                "gte": date_start.isoformat(),
+                "lte": date_stop.isoformat()
             }
         }
 
@@ -100,9 +77,11 @@ class PlanetDataCatalog(ICatalog):
 
         # Search API request object
         search_endpoint_request = {
-            "item_types": ["REOrthoTile"],
+            "item_types": provider,
             "filter": query_filter
         }
+
+
 
         result = \
             requests.post(
@@ -113,6 +92,8 @@ class PlanetDataCatalog(ICatalog):
         scenes_data = result.json()["features"]
         for scene in scenes_data:
             print ujson.dumps(scene)
+
+        return scenes_data
 
     def register(self, ds):
         raise Exception('Cannot register dataset in repository %s' % self.__class__.__name__)
@@ -185,79 +166,23 @@ class PlanetCatalog(ICatalog):
 
 
 
-class PlanetScenes(ICatalog):
-    def __init__(self):
-        self.authkey = "7be82d074a904f35b60ceae1807cafab"
-        self.urls = dict()
-        self.urls['planetscope'] = "https://api.planet.com/v0/scenes/ortho/"
-        self.urls['rapideye'] = "https://api.planet.com/v0/scenes/rapideye/"
-        self.urls['landsat'] = "https://api.planet.com/v0/scenes/landsat/"
-
-    def find(self, provider, aoi, date_start, date_stop, cloud_ratio=0.2):
-
-        url = self.urls[provider]
-        poly = Polygon(aoi)
-        geometry = wkt_dumps(poly)
-
-        params = {
-            "intersects": geometry,
-            "product": "analytic",
-            'acquired': '[{start}:{end}]'.format(
-                start=date_start.isoformat(), end=date_stop.isoformat()),
-            'cloud_cover': '[:{}]'.format(cloud_ratio),
-        }
-
-        data = requests.get(url, params=params, auth=(self.authkey, ''))
-        scenes_data = data.json()["features"]
-        datasets = set()
-        for s in scenes_data:
-            ds = Dataset()
-            ds.identifier = s['id']
-            ds.uuid = uuid4()
-            ds.time_created = s['properties']['acquired']
-            g1 = geojson.loads(ujson.dumps(s['geometry']))
-            g2 = shape(g1)
-            ds.extent = WKTElement(g2.wkt, srid=4326)
-            ds.properties = s['properties']
-            datasets.add(ds)
-
-            con = PlanetContainer()
-            try:
-                if provider == 'landsat':
-                    con.analytic = s["properties"]["data"]["products"]
-
-                else:
-                    con.analytic = s["properties"]["data"]["products"]["analytic"]["full"]
-                    con.visual = s["properties"]["data"]["products"]["visual"]["full"]
-                ds.container = con.to_dict()
-            except:
-                pass
-
-            datasets.add(ds)
-
-            print s["properties"]
-
-    def register(self, ds):
-        raise Exception('Cannot register dataset in repository %s' % self.__class__.__name__)
 
 
 
 if __name__ == '__main__':
-    provider = 'landsat'
+    provider = 'rapideye'
+
+    provider = ["REOrthoTile"]
     max_cloud_ratio = 0.0
     max_black_fill = 0.1
-    ag_season_start = datetime(2015, 1, 1, tzinfo=UTC)
-    ag_season_end = datetime(2015, 8, 15, tzinfo=UTC)
-    aoi_nw = (-94.165, 42.210)
-    aoi_se = (-93.698, 41.863)
-    aoi_nw = (-121.807, 38.561)
-    aou_se = (-121.694, 38.494)
+    ag_season_start = datetime(2016, 1, 1, tzinfo=UTC)
+    ag_season_end = datetime(2017, 8, 15, tzinfo=UTC)
+    aoi_nw = (-91.6959003976, 17.0346713486)
+    aoi_se = (-90.4831139337, 15.9802308919)
     aoi_ne = (aoi_se[0], aoi_nw[1])
     aoi_sw = (aoi_nw[0], aoi_se[1])
     aoi = [aoi_nw, aoi_ne, aoi_se, aoi_sw, aoi_nw]
 
     cat = PlanetDataCatalog()
-    datasets = cat.find(provider, aoi, ag_season_start, ag_season_end, max_cloud_ratio)
-    # cat = PlanetScenes()
-    # datasets = cat.find(provider,aoi,ag_season_start,ag_season_end,max_cloud_ratio)
-    # print 'hallo'
+    res = cat.find(provider, aoi, ag_season_start, ag_season_end, max_cloud_ratio)
+    print len(res)
