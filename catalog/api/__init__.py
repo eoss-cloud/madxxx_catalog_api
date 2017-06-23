@@ -18,7 +18,6 @@ import logging
 import dateutil.parser
 import falcon
 
-from general.catalog_exception import SerializerException
 
 VERSION = "v1"
 COMPLEX_TYPES = ["datetime", "Polygon", 'WKBElement']

@@ -90,10 +90,10 @@ def update_catalog(queue_name, api_endpoint):
                             'ReceiptHandle': message_obj.receipt_handle
                         })
                     except ValueError:
-                        logger.error('ERROR: metadata location structure corrupted')
-                        print req.text
+                        logger.exception('ERROR: metadata location structure corrupted',
+                                         extra={'metadata_response':req.text})
                     except Exception, e:
-                        logging.exception('General Error ooccured')
+                        logging.exception('General Error ooccured', extra={'request_url':req.url})
                         should_break = True
                     finally:
                         if len(messages_to_delete) > 0:

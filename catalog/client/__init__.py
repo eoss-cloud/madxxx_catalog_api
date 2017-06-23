@@ -24,6 +24,7 @@ cors = CORS(allow_all_origins='*',
             allow_credentials_all_origins=True)
 
 
+
 class RequireJSON(object):
     """
     Falcon middleware which checks json conditions for each requests
